@@ -1,0 +1,348 @@
+/* Options page styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 40px 20px;
+}
+
+.options-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+.options-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 32px;
+    text-align: center;
+}
+
+.options-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.options-header p {
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+.options-content {
+    padding: 32px;
+}
+
+/* ---- Tab Navigation ---- */
+.tab-nav {
+    display: flex;
+    gap: 4px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 4px;
+    margin-bottom: 28px;
+}
+
+.tab-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.tab-btn:hover {
+    color: #334155;
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.tab-btn.active {
+    background: white;
+    color: #667eea;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+}
+
+.tab-icon {
+    font-size: 16px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+    animation: tabFadeIn 0.25s ease-out;
+}
+
+@keyframes tabFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---- Form Elements ---- */
+.option-group {
+    margin-bottom: 28px;
+}
+
+.option-group label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.label-icon {
+    font-size: 18px;
+    margin-right: 8px;
+}
+
+.option-select {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.option-select:hover {
+    border-color: #cbd5e0;
+}
+
+.option-select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.option-input {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    color: #333;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.option-input:hover {
+    border-color: #cbd5e0;
+}
+
+.option-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.option-input::placeholder {
+    color: #a0aec0;
+}
+
+.option-hint {
+    font-size: 12px;
+    color: #718096;
+    margin-top: 8px;
+    line-height: 1.5;
+}
+
+.option-hint a {
+    color: #667eea;
+    text-decoration: none;
+}
+
+.option-hint a:hover {
+    text-decoration: underline;
+}
+
+/* ---- API Key Wrapper ---- */
+.api-key-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.api-key-wrapper .option-input {
+    flex: 1;
+}
+
+.toggle-visibility-btn {
+    background: #f1f5f9;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    width: 46px;
+    height: 46px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s;
+}
+
+.toggle-visibility-btn:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e0;
+}
+
+/* ---- Radio Group ---- */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: flex-start;
+    padding: 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.radio-option:hover {
+    border-color: #cbd5e0;
+    background: #f7fafc;
+}
+
+.radio-option input[type="radio"] {
+    margin-top: 2px;
+    margin-right: 12px;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+    accent-color: #667eea;
+}
+
+.radio-option input[type="radio"]:checked~.radio-content {
+    color: #667eea;
+}
+
+.radio-option:has(input[type="radio"]:checked) {
+    border-color: #667eea;
+    background: #f0f4ff;
+}
+
+.radio-content {
+    flex: 1;
+}
+
+.radio-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.radio-description {
+    font-size: 13px;
+    color: #718096;
+    line-height: 1.4;
+}
+
+/* ---- Save Button ---- */
+.save-button {
+    width: 100%;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 32px;
+}
+
+.save-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.save-button:active {
+    transform: translateY(0);
+}
+
+.button-icon {
+    font-size: 18px;
+}
+
+/* ---- Status Message ---- */
+.status-message {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: center;
+    display: none;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.status-message.success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-message.error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}

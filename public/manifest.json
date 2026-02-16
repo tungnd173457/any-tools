@@ -1,0 +1,46 @@
+{
+    "manifest_version": 3,
+    "name": "AnyTools",
+    "version": "1.2.0",
+    "description": "Multi-tool Chrome Extension - Translate, Chat with AI, and more",
+    "permissions": [
+        "storage",
+        "activeTab",
+        "sidePanel"
+    ],
+    "host_permissions": [
+        "https://translate-pa.googleapis.com/*",
+        "https://api.openai.com/*"
+    ],
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "css": [
+                "assets/content.css"
+            ],
+            "run_at": "document_end",
+            "all_frames": false
+        }
+    ],
+    "side_panel": {
+        "default_path": "src/modules/chat/sidepanel/index.html"
+    },
+    "action": {
+        "default_title": "AnyTools - Toggle Chat"
+    },
+    "options_page": "src/options/index.html",
+    "icons": {
+        "16": "icons/tool_icon.png",
+        "48": "icons/tool_icon.png",
+        "128": "icons/tool_icon.png"
+    }
+}

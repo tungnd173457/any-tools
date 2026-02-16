@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Typing animation */
+@keyframes blink {
+
+    0%,
+    80%,
+    100% {
+        opacity: 0.3;
+    }
+
+    40% {
+        opacity: 1;
+    }
+}
+
+.typing-dot:nth-child(1) {
+    animation: blink 1.4s infinite 0s;
+}
+
+.typing-dot:nth-child(2) {
+    animation: blink 1.4s infinite 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation: blink 1.4s infinite 0.4s;
+}
+
+/* Markdown inside messages */
+.msg-content p {
+    margin-bottom: 0.5em;
+}
+
+.msg-content p:last-child {
+    margin-bottom: 0;
+}
+
+.msg-content pre {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    overflow-x: auto;
+    margin: 8px 0;
+    font-size: 13px;
+}
+
+.msg-content code {
+    background: rgba(0, 0, 0, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.msg-content pre code {
+    background: none;
+    padding: 0;
+}
+
+.msg-content ul,
+.msg-content ol {
+    margin-left: 1.2em;
+    margin-bottom: 0.5em;
+}
+
+.msg-content li {
+    margin-bottom: 0.2em;
+}
