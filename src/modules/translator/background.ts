@@ -98,10 +98,15 @@ function parseTranslationResponse(data: any): TranslationResult {
 
 // Initialize default settings on installation
 chrome.runtime.onInstalled.addListener(() => {
-    chrome.storage.sync.set({
-        sourceLang: 'auto',
-        targetLang: 'vi',
-        popupMode: 'button',
-        googleApiKey: ''
+    chrome.storage.sync.get(['sourceLang', 'targetLang', 'popupMode', 'googleApiKey'], (data) => {
+        const defaults: Record<string, any> = {};
+        if (data.sourceLang === undefined) defaults.sourceLang = 'auto';
+        if (data.targetLang === undefined) defaults.targetLang = 'vi';
+        if (data.popupMode === undefined) defaults.popupMode = 'button';
+        if (data.googleApiKey === undefined) defaults.googleApiKey = '';
+
+        if (Object.keys(defaults).length > 0) {
+            chrome.storage.sync.set(defaults);
+        }
     });
 });
