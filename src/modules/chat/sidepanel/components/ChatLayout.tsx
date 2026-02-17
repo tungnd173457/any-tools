@@ -6,6 +6,7 @@ import ChatInput from './ChatInput';
 import HistoryPanel from './HistoryPanel';
 import WelcomeScreen from './WelcomeScreen';
 import ErrorBanner from './ErrorBanner';
+import SelectionContext from './SelectionContext';
 
 const ChatLayout: React.FC = () => {
     const { messages, error, clearError } = useChatContext();
@@ -27,6 +28,7 @@ const ChatLayout: React.FC = () => {
             </div>
 
             {/* Input */}
+            <SelectionContext />
             <ChatInput />
 
             {/* History Overlay */}

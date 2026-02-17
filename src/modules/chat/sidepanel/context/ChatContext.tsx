@@ -10,6 +10,9 @@ interface ChatContextType {
     settings: ChatSettings;
     error: string | null;
 
+    selectedText: string;
+    setSelectedText: (text: string) => void;
+
     // Actions
     sendMessage: (text: string) => void;
     startNewConversation: () => void;
@@ -43,6 +46,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isStreaming, setIsStreaming] = useState(false);
     const [settings, setSettings] = useState<ChatSettings>({ openaiApiKey: '', chatModel: 'gpt-4.1-mini' });
     const [error, setError] = useState<string | null>(null);
+    const [selectedText, setSelectedText] = useState<string>('');
 
     // Refs to keep latest state in callbacks
     const messagesRef = useRef(messages);
@@ -52,19 +56,33 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     conversationsRef.current = conversations;
     currentConvoRef.current = currentConversation;
 
+    // Listen for text selection from content script
+    useEffect(() => {
+        const handleMessage = (request: any, sender: any, sendResponse: any) => {
+            if (request.action === 'textSelected') {
+                setSelectedText(request.text || '');
+            }
+        };
+        chrome.runtime.onMessage.addListener(handleMessage);
+        return () => chrome.runtime.onMessage.removeListener(handleMessage);
+    }, []);
+
     // Load settings
     useEffect(() => {
         chrome.storage.sync.get({ openaiApiKey: '', chatModel: 'gpt-4.1-mini' }, (data) => {
-            setSettings({ openaiApiKey: data.openaiApiKey || '', chatModel: data.chatModel || 'gpt-4.1-mini' });
+            setSettings({
+                openaiApiKey: (data.openaiApiKey as string) || '',
+                chatModel: (data.chatModel as string) || 'gpt-4.1-mini'
+            });
         });
 
         const listener = (changes: { [key: string]: chrome.storage.StorageChange }, namespace: string) => {
             if (namespace === 'sync') {
                 if (changes.openaiApiKey) {
-                    setSettings(prev => ({ ...prev, openaiApiKey: changes.openaiApiKey.newValue || '' }));
+                    setSettings(prev => ({ ...prev, openaiApiKey: (changes.openaiApiKey.newValue as string) || '' }));
                 }
                 if (changes.chatModel) {
-                    setSettings(prev => ({ ...prev, chatModel: changes.chatModel.newValue || 'gpt-4.1-mini' }));
+                    setSettings(prev => ({ ...prev, chatModel: (changes.chatModel.newValue as string) || 'gpt-4.1-mini' }));
                 }
             }
         };
@@ -75,7 +93,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Load conversations
     useEffect(() => {
         chrome.storage.local.get({ chatConversations: [] }, (data) => {
-            setConversations(data.chatConversations || []);
+            setConversations((data.chatConversations as ChatConversation[]) || []);
         });
     }, []);
 
@@ -124,10 +142,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         setError(null);
 
+        let finalContent = text.trim();
+        if (selectedText) {
+            finalContent = `Start of Context:\n"${selectedText}"\nEnd of Context\n\n${text.trim()}`;
+            setSelectedText('');
+        }
+
         const userMsg: ChatMessage = {
             id: generateId(),
             role: 'user',
-            content: text.trim(),
+            content: finalContent,
             timestamp: Date.now(),
         };
 
@@ -205,7 +229,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
             }
         );
-    }, [isStreaming, settings, persistConversations]);
+    }, [isStreaming, settings, persistConversations, selectedText]);
 
     return (
         <ChatContext.Provider value={{
@@ -215,6 +239,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             isStreaming,
             settings,
             error,
+            selectedText,
+            setSelectedText,
             sendMessage,
             startNewConversation,
             loadConversation,

@@ -1,14 +1,10 @@
 import React from 'react';
 import { useChatContext } from '../context/ChatContext';
 import {
-    MessageSquare,
-    Search,
     Highlighter,
     MonitorSmartphone,
     BrainCircuit,
-    Cpu,
-    Sparkles,
-    Code
+    Cpu
 } from 'lucide-react';
 
 const WelcomeScreen: React.FC = () => {
@@ -21,12 +17,7 @@ const WelcomeScreen: React.FC = () => {
         { icon: <Cpu className="w-4 h-4" />, label: 'AI Slides' },
     ];
 
-    const quickActions = [
-        { icon: <Sparkles className="w-4 h-4" />, label: 'Explain', prompt: 'Explain the following: ' },
-        { icon: <Search className="w-4 h-4" />, label: 'Summarize', prompt: 'Summarize the following: ' },
-        { icon: <MessageSquare className="w-4 h-4" />, label: 'Fix spelling & grammar', prompt: 'Fix spelling and grammar: ' },
-        { icon: <Code className="w-4 h-4" />, label: 'Write code', prompt: 'Write code to: ' },
-    ];
+
 
     return (
         <div className="flex flex-col h-full bg-[#0f0f10] text-white">
@@ -53,23 +44,8 @@ const WelcomeScreen: React.FC = () => {
                 </div>
 
                 {/* Quick Prompts */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full">
-                    {quickActions.map((action) => (
-                        <button
-                            key={action.label}
-                            onClick={() => sendMessage(action.prompt)}
-                            className="flex flex-col items-start gap-1 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] hover:bg-white/[0.06] hover:border-white/[0.1] transition-all text-left group w-full"
-                        >
-                            <div className="flex items-center gap-2 text-white/50 group-hover:text-white/80 transition-colors">
-                                {action.icon}
-                                <span className="text-xs font-medium">{action.label}</span>
-                            </div>
-                            <span className="text-xs text-white/30 truncate w-full">
-                                {action.prompt} ...
-                            </span>
-                        </button>
-                    ))}
-                </div>
+                {/* Content Removed as per request */}
+                <div className="w-full"></div>
             </div>
 
             <div className="flex-1" />
