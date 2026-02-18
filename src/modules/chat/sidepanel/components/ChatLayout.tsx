@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useChatContext } from '../context/ChatContext';
-import ChatHeader from './ChatHeader';
+
 import MessageList from './MessageList';
 import ChatInput from './ChatInput';
 import HistoryPanel from './HistoryPanel';
@@ -13,10 +13,7 @@ const ChatLayout: React.FC = () => {
     const [historyOpen, setHistoryOpen] = useState(false);
 
     return (
-        <div className="flex flex-col h-screen bg-[#0f0f10] text-white font-['Inter',system-ui,sans-serif] relative overflow-hidden">
-            {/* Header */}
-            <ChatHeader />
-
+        <div className="flex flex-col h-screen bg-[var(--chrome-bg)] text-[var(--chrome-text)] font-['Inter',system-ui,sans-serif] relative overflow-hidden">
             {/* Error */}
             {error && <ErrorBanner message={error} onClose={clearError} />}
 
@@ -27,7 +24,7 @@ const ChatLayout: React.FC = () => {
 
             {/* Input */}
             {/* Input Area */}
-            <div className="flex-none bg-[#0f0f10]">
+            <div className="flex-none bg-[var(--chrome-bg)]">
                 <SelectionContext />
                 <ChatInput onToggleHistory={() => setHistoryOpen(!historyOpen)} />
             </div>

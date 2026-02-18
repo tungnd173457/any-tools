@@ -70,11 +70,11 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
 
             <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[12px] font-medium text-white/90">AI</span>
-                    <span className="text-[10px] text-white/30">{formatTime(message.timestamp)}</span>
+                    <span className="text-[12px] font-medium opacity-90">AI</span>
+                    <span className="text-[10px] opacity-30">{formatTime(message.timestamp)}</span>
                 </div>
 
-                <div className="text-white/90 text-[14px] leading-relaxed">
+                <div className="text-[var(--chrome-text)] opacity-90 text-[14px] leading-relaxed">
                     <div
                         className="msg-content prose prose-invert prose-sm max-w-none break-words"
                         dangerouslySetInnerHTML={{ __html: formatContent(message.content) }}
