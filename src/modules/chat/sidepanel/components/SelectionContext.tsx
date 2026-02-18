@@ -13,51 +13,52 @@ const SelectionContext: React.FC = () => {
     };
 
     return (
-        <div className="px-3 pb-2 pt-0 w-full animate-in slide-in-from-bottom-2 fade-in duration-200">
-            <div className="bg-white/[0.04] border border-white/[0.08] rounded-xl p-3 flex flex-col gap-3 shadow-lg backdrop-blur-sm">
-
-                {/* Header with Close */}
-                <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium text-white/50 uppercase tracking-wider">
-                        Text from your selection
-                    </span>
-                    <button
-                        onClick={() => setSelectedText('')}
-                        className="text-white/30 hover:text-white/70 transition-colors"
-                    >
-                        <X className="w-4 h-4" />
-                    </button>
+        <div className="px-3 pb-3 animate-in slide-in-from-bottom-2 fade-in duration-200">
+            <div className="bg-white rounded-xl border border-white/10 shadow-lg overflow-hidden">
+                {/* Header / Text Content */}
+                <div className="p-3 relative">
+                    <div className="flex justify-between items-start mb-1">
+                        <span className="text-xs font-medium text-gray-500">Text from your selection</span>
+                        <button
+                            onClick={() => setSelectedText('')}
+                            className="text-gray-400 hover:text-gray-600 transition-colors p-0.5 rounded-full hover:bg-gray-100"
+                        >
+                            <X className="w-3.5 h-3.5" />
+                        </button>
+                    </div>
+                    <p className="text-sm text-gray-800 line-clamp-3 leading-relaxed">
+                        {selectedText}
+                    </p>
                 </div>
 
-                {/* Selected Text Preview */}
-                <div className="text-sm text-white/80 line-clamp-3 border-l-2 border-violet-500/50 pl-2 italic">
-                    {selectedText}
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2 mt-1">
+                {/* Actions Toolbar */}
+                <div className="px-3 pb-3 flex flex-wrap gap-2">
                     <button
                         onClick={() => handleAction('Explain this:')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.05] rounded-lg text-xs font-medium text-white/90 transition-all hover:scale-[1.02]"
+                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-700 transition-colors"
                     >
-                        <Sparkles className="w-3.5 h-3.5 text-violet-400" />
                         Explain
                     </button>
 
                     <button
-                        onClick={() => handleAction('Summarize this:')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.05] rounded-lg text-xs font-medium text-white/90 transition-all hover:scale-[1.02]"
+                        onClick={() => handleAction('Translate to English:')}
+                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-700 transition-colors flex items-center gap-1"
                     >
-                        <FileText className="w-3.5 h-3.5 text-blue-400" />
+                        Translate
+                    </button>
+
+                    <button
+                        onClick={() => handleAction('Summarize this:')}
+                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-700 transition-colors"
+                    >
                         Summarize
                     </button>
 
                     <button
-                        onClick={() => handleAction('Answer this question:')}
-                        className="flex items-center gap-1.5 px-3 py-1.5 bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.05] rounded-lg text-xs font-medium text-white/90 transition-all hover:scale-[1.02]"
+                        onClick={() => handleAction('Improve writing of this:')}
+                        className="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-xs font-medium text-gray-700 transition-colors"
                     >
-                        <HelpCircle className="w-3.5 h-3.5 text-emerald-400" />
-                        Answer
+                        Improve writing
                     </button>
                 </div>
             </div>

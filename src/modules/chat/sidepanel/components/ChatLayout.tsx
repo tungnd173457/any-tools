@@ -15,9 +15,7 @@ const ChatLayout: React.FC = () => {
     return (
         <div className="flex flex-col h-screen bg-[#0f0f10] text-white font-['Inter',system-ui,sans-serif] relative overflow-hidden">
             {/* Header */}
-            <ChatHeader
-                onToggleHistory={() => setHistoryOpen(!historyOpen)}
-            />
+            <ChatHeader />
 
             {/* Error */}
             {error && <ErrorBanner message={error} onClose={clearError} />}
@@ -28,8 +26,11 @@ const ChatLayout: React.FC = () => {
             </div>
 
             {/* Input */}
-            <SelectionContext />
-            <ChatInput />
+            {/* Input Area */}
+            <div className="flex-none bg-[#0f0f10]">
+                <SelectionContext />
+                <ChatInput onToggleHistory={() => setHistoryOpen(!historyOpen)} />
+            </div>
 
             {/* History Overlay */}
             {historyOpen && (
