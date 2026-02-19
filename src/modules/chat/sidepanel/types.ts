@@ -3,6 +3,7 @@ export interface ChatMessage {
     role: 'user' | 'assistant' | 'system';
     content: string;
     timestamp: number;
+    imageUrl?: string; // base64 data URL for screenshot images
 }
 
 export interface ChatConversation {

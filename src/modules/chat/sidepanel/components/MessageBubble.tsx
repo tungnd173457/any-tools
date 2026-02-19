@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Bot, User } from 'lucide-react';
 import { ChatMessage } from '../types';
 
@@ -41,6 +41,33 @@ function formatContent(content: string): string {
     return html;
 }
 
+const ImagePreview: React.FC<{ src: string }> = ({ src }) => {
+    const [expanded, setExpanded] = useState(false);
+
+    return (
+        <>
+            <img
+                src={src}
+                alt="Screenshot"
+                className="max-w-full max-h-[200px] rounded-lg border border-white/10 object-cover cursor-pointer hover:opacity-90 transition-opacity shadow-sm mb-2"
+                onClick={() => setExpanded(true)}
+            />
+            {expanded && (
+                <div
+                    className="fixed inset-0 z-[9999] bg-black/80 flex items-center justify-center cursor-pointer backdrop-blur-sm"
+                    onClick={() => setExpanded(false)}
+                >
+                    <img
+                        src={src}
+                        alt="Screenshot expanded"
+                        className="max-w-[90%] max-h-[90%] rounded-xl shadow-2xl object-contain"
+                    />
+                </div>
+            )}
+        </>
+    );
+};
+
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     const isUser = message.role === 'user';
 
@@ -49,10 +76,16 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
             <div className="flex justify-end mb-4">
                 <div className="max-w-[85%] flex flex-col items-end">
                     <div className="bg-[#4f46e5] text-white rounded-2xl rounded-tr-sm px-4 py-2.5 text-[14px] leading-relaxed shadow-md">
-                        <div
-                            className="msg-content break-words"
-                            dangerouslySetInnerHTML={{ __html: formatContent(message.content) }}
-                        />
+                        {/* Show screenshot image if present */}
+                        {message.imageUrl && (
+                            <ImagePreview src={message.imageUrl} />
+                        )}
+                        {message.content && (
+                            <div
+                                className="msg-content break-words"
+                                dangerouslySetInnerHTML={{ __html: formatContent(message.content) }}
+                            />
+                        )}
                     </div>
                 </div>
             </div>

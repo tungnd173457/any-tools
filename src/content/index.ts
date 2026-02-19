@@ -141,20 +141,23 @@ function onMouseUp(e: MouseEvent) {
         height: parseInt(selectionBox.style.height)
     };
 
+    // Remove overlay BEFORE capturing so it's not in the screenshot
     document.body.removeChild(selectionOverlay);
     selectionOverlay = null;
     selectionBox = null;
 
-    // Send coordinates back
-    console.log('Selection finished:', rect);
-    try {
-        chrome.runtime.sendMessage({
-            action: 'screenshotAreaSelected',
-            rect: rect
-        });
-    } catch (err) {
-        console.error('Failed to send screenshot area:', err);
-    }
+    // Small delay to let the browser repaint without the overlay
+    setTimeout(() => {
+        try {
+            chrome.runtime.sendMessage({
+                action: 'screenshotAreaSelected',
+                rect: rect,
+                devicePixelRatio: window.devicePixelRatio || 1
+            });
+        } catch (err) {
+            console.error('Failed to send screenshot area:', err);
+        }
+    }, 100);
 }
 
 console.log('AnyTools Content Script Loaded');

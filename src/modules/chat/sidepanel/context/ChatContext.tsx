@@ -13,6 +13,9 @@ interface ChatContextType {
     selectedText: string;
     setSelectedText: (text: string) => void;
 
+    screenshotImage: string | null;
+    setScreenshotImage: (url: string | null) => void;
+
     // Actions
     sendMessage: (text: string) => void;
     startNewConversation: () => void;
@@ -47,20 +50,29 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [settings, setSettings] = useState<ChatSettings>({ openaiApiKey: '', chatModel: 'gpt-4.1-mini' });
     const [error, setError] = useState<string | null>(null);
     const [selectedText, setSelectedText] = useState<string>('');
+    const [screenshotImage, setScreenshotImage] = useState<string | null>(null);
 
     // Refs to keep latest state in callbacks
     const messagesRef = useRef(messages);
     const conversationsRef = useRef(conversations);
     const currentConvoRef = useRef(currentConversation);
+    const screenshotRef = useRef(screenshotImage);
     messagesRef.current = messages;
     conversationsRef.current = conversations;
     currentConvoRef.current = currentConversation;
+    screenshotRef.current = screenshotImage;
 
-    // Listen for text selection from content script
+    // Listen for text selection and screenshot from content script / background
     useEffect(() => {
         const handleMessage = (request: any, sender: any, sendResponse: any) => {
             if (request.action === 'textSelected') {
                 setSelectedText(request.text || '');
+            }
+            if (request.action === 'screenshotCaptured') {
+                setScreenshotImage(request.imageUrl || null);
+            }
+            if (request.action === 'screenshotError') {
+                setError(request.error || 'Screenshot capture failed');
             }
         };
         chrome.runtime.onMessage.addListener(handleMessage);
@@ -148,11 +160,18 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setSelectedText('');
         }
 
+        // Capture current screenshot before clearing
+        const currentScreenshot = screenshotRef.current;
+        if (currentScreenshot) {
+            setScreenshotImage(null);
+        }
+
         const userMsg: ChatMessage = {
             id: generateId(),
             role: 'user',
             content: finalContent,
             timestamp: Date.now(),
+            imageUrl: currentScreenshot || undefined,
         };
 
         const newMessages = [...messagesRef.current, userMsg];
@@ -186,7 +205,23 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Send to background
         setIsStreaming(true);
 
-        const apiMessages = newMessages.map(m => ({ role: m.role, content: m.content }));
+        // Build API messages - use OpenAI Vision format if any message has an image
+        const apiMessages = newMessages.map(m => {
+            if (m.imageUrl) {
+                // Vision API format: content is an array of parts
+                return {
+                    role: m.role,
+                    content: [
+                        ...(m.content ? [{ type: 'text', text: m.content }] : []),
+                        {
+                            type: 'image_url',
+                            image_url: { url: m.imageUrl, detail: 'auto' }
+                        }
+                    ]
+                };
+            }
+            return { role: m.role, content: m.content };
+        });
 
         chrome.runtime.sendMessage(
             {
@@ -241,6 +276,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             error,
             selectedText,
             setSelectedText,
+            screenshotImage,
+            setScreenshotImage,
             sendMessage,
             startNewConversation,
             loadConversation,

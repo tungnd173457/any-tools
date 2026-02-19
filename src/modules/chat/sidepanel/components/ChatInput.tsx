@@ -1,19 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useChatContext } from '../context/ChatContext';
-import { Scissors, Paperclip, History, Plus, ChevronDown, BookOpen } from 'lucide-react';
+import { Scissors, Paperclip, History, Plus, ChevronDown, BookOpen, X } from 'lucide-react';
 
 interface ChatInputProps {
     onToggleHistory: () => void;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({ onToggleHistory }) => {
-    const { sendMessage, isStreaming, settings, setModel, startNewConversation } = useChatContext();
+    const { sendMessage, isStreaming, settings, setModel, startNewConversation, screenshotImage, setScreenshotImage } = useChatContext();
     const [text, setText] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const handleSend = () => {
-        if (!text.trim() || isStreaming) return;
-        sendMessage(text);
+        if ((!text.trim() && !screenshotImage) || isStreaming) return;
+        sendMessage(text || 'What is in this image?');
         setText('');
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
@@ -116,12 +116,32 @@ const ChatInput: React.FC<ChatInputProps> = ({ onToggleHistory }) => {
 
             {/* Input Area */}
             <div className="relative group bg-[var(--chrome-input-bg)] rounded-2xl border border-[var(--chrome-border)] focus-within:border-[var(--chrome-text)]/20 transition-all">
+                {/* Screenshot Preview */}
+                {screenshotImage && (
+                    <div className="px-3 pt-3">
+                        <div className="relative inline-block group/img">
+                            <img
+                                src={screenshotImage}
+                                alt="Screenshot"
+                                className="max-h-[120px] max-w-full rounded-lg border border-[var(--chrome-border)] object-cover shadow-sm"
+                            />
+                            <button
+                                onClick={() => setScreenshotImage(null)}
+                                className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow-md hover:bg-red-600 transition-colors opacity-0 group-hover/img:opacity-100"
+                                title="Remove screenshot"
+                            >
+                                <X className="w-3 h-3" />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 <textarea
                     ref={textareaRef}
                     value={text}
                     onChange={e => setText(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Ask anything, @ models, / prompts"
+                    placeholder={screenshotImage ? "Ask about this screenshot..." : "Ask anything, @ models, / prompts"}
                     rows={1}
                     className="w-full bg-transparent text-[var(--chrome-text)] text-sm resize-none outline-none placeholder:opacity-30 px-4 py-3 max-h-[120px] pr-10"
                 />
@@ -142,7 +162,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onToggleHistory }) => {
 
                     <button
                         onClick={handleSend}
-                        disabled={!text.trim() || isStreaming}
+                        disabled={(!text.trim() && !screenshotImage) || isStreaming}
                         className="w-8 h-8 rounded-full bg-[var(--chrome-text)] text-[var(--chrome-bg)] flex items-center justify-center disabled:opacity-30 disabled:cursor-not-allowed hover:opacity-90 transition-all active:scale-95"
                     >
                         {isStreaming ? (
