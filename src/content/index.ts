@@ -51,7 +51,7 @@ function debounce(func: Function, wait: number) {
     };
 }
 
-const debouncedHandleSelection = debounce(handleSelection, 500);
+const debouncedHandleSelection = debounce(handleSelection, 100);
 
 document.addEventListener('mouseup', debouncedHandleSelection);
 document.addEventListener('keyup', debouncedHandleSelection);

@@ -13,7 +13,7 @@ const SelectionContext: React.FC = () => {
     };
 
     return (
-        <div className="px-3 pb-3 animate-in slide-in-from-bottom-2 fade-in duration-200">
+        <div className="px-3 pb-3 animate-in slide-in-from-bottom-2 fade-in duration-150">
             <div className="bg-white rounded-xl border border-white/10 shadow-lg overflow-hidden">
                 {/* Header / Text Content */}
                 <div className="p-3 relative">
