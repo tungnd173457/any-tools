@@ -58,7 +58,7 @@ const ActiveTabSummary: React.FC = () => {
                 return;
             }
             if (response && response.content) {
-                const prompt = `Please summarize the content of this page: "${tabInfo.title}"\n\nContent:\n${response.content}`;
+                const prompt = `Start of Page Context:\nTitle: ${tabInfo.title}\nURL: ${tabInfo.url}\nFavicon: ${tabInfo.favIconUrl}\n\nContent:\n${response.content}\nEnd of Page Context\n\nPlease summarize the content of this page.`;
                 sendMessage(prompt);
             }
         });

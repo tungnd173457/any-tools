@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bot, User } from 'lucide-react';
+import { Bot, User, Globe } from 'lucide-react';
 import { ChatMessage } from '../types';
 
 interface MessageBubbleProps {
@@ -68,22 +68,104 @@ const ImagePreview: React.FC<{ src: string }> = ({ src }) => {
     );
 };
 
+const ContextBox: React.FC<{ text: string }> = ({ text }) => {
+    const [expanded, setExpanded] = useState(false);
+    return (
+        <div
+            className="mb-2 max-w-full rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/10 px-3 py-2 text-[13px] text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-black/10 dark:hover:bg-white/20 transition-all dropdown-shadow"
+            onClick={() => setExpanded(!expanded)}
+            title="Click to expand/collapse"
+        >
+            <div className={`whitespace-pre-wrap break-words ${expanded ? '' : 'line-clamp-1'}`}>
+                {text}
+            </div>
+        </div>
+    );
+};
+
+const PageContextBox: React.FC<{ title: string; url: string; favicon: string; content: string }> = ({ title, url, favicon, content }) => {
+    const [expanded, setExpanded] = useState(false);
+
+    let hostname = url;
+    try {
+        hostname = new URL(url).hostname;
+    } catch {
+        // ignore
+    }
+
+    return (
+        <div className="mb-2 w-full max-w-[250px] rounded-xl border border-black/10 dark:border-white/10 bg-black/5 dark:bg-white/10 p-3 text-[13px] text-gray-700 dark:text-gray-300 dropdown-shadow flex flex-col gap-2 cursor-pointer hover:bg-black/10 dark:hover:bg-white/20 transition-all"
+            onClick={() => setExpanded(!expanded)}
+        >
+            <div className="flex items-center gap-2">
+                {favicon ? (
+                    <img src={favicon} className="w-5 h-5 rounded-sm flex-shrink-0 object-contain bg-white/50" alt="" />
+                ) : (
+                    <Globe className="w-5 h-5 text-[#8b5cf6]" />
+                )}
+                <div className="flex flex-col overflow-hidden w-full">
+                    <span className="font-medium text-[var(--chrome-text)] truncate w-full" title={title}>{title}</span>
+                    <a
+                        href={url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-[11px] opacity-60 hover:text-[#8b5cf6] hover:opacity-100 truncate w-full transition-colors flex items-center justify-start"
+                        onClick={(e) => e.stopPropagation()}
+                        title={url}
+                    >
+                        {hostname}
+                    </a>
+                </div>
+            </div>
+            {expanded && (
+                <div className="mt-2 pt-2 border-t border-black/10 dark:border-white/10 text-[12px] opacity-80 whitespace-pre-wrap break-words max-h-[200px] overflow-y-auto custom-scrollbar">
+                    <div className="line-clamp-[10]">{content}</div>
+                </div>
+            )}
+        </div>
+    );
+};
+
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     const isUser = message.role === 'user';
+
+    let displayContent = message.content;
+    let contextText = null;
+    let pageContext = null;
+
+    if (isUser && message.content) {
+        const textContextMatch = message.content.match(/^Start of Context:\n"([\s\S]*?)"\nEnd of Context\n\n([\s\S]*)$/);
+        const pageContextMatch = message.content.match(/^Start of Page Context:\nTitle: (.*)\nURL: (.*)\nFavicon: (.*)\n\nContent:\n([\s\S]*?)\nEnd of Page Context\n\n([\s\S]*)$/);
+
+        if (textContextMatch) {
+            contextText = textContextMatch[1];
+            displayContent = textContextMatch[2];
+        } else if (pageContextMatch) {
+            pageContext = {
+                title: pageContextMatch[1],
+                url: pageContextMatch[2],
+                favicon: pageContextMatch[3],
+                content: pageContextMatch[4]
+            };
+            displayContent = pageContextMatch[5];
+        }
+    }
 
     if (isUser) {
         return (
             <div className="flex justify-end mb-4">
-                <div className="max-w-[85%] flex flex-col items-end">
-                    <div className="bg-[#4f46e5] text-white rounded-2xl rounded-tr-sm px-4 py-2.5 text-[14px] leading-relaxed shadow-md">
+                <div className="max-w-[85%] flex flex-col items-end text-left w-full">
+                    {contextText && <ContextBox text={contextText} />}
+                    {pageContext && <PageContextBox {...pageContext} />}
+                    <div className="bg-[#f0f0f0] dark:bg-[#2f2f2f] text-black dark:text-white rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed shadow-sm self-end">
                         {/* Show screenshot image if present */}
                         {message.imageUrl && (
                             <ImagePreview src={message.imageUrl} />
                         )}
-                        {message.content && (
+                        {displayContent && (
                             <div
                                 className="msg-content break-words"
-                                dangerouslySetInnerHTML={{ __html: formatContent(message.content) }}
+                                dangerouslySetInnerHTML={{ __html: formatContent(displayContent) }}
                             />
                         )}
                     </div>
