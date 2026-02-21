@@ -67,6 +67,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'startScreenshot') {
         startSelection();
     }
+    if (request.action === 'getPageContent') {
+        const content = document.body.innerText || document.documentElement.innerText;
+        sendResponse({ content, title: document.title });
+    }
 });
 
 function startSelection() {

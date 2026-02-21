@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useChatContext } from '../context/ChatContext';
 import { Scissors, Paperclip, History, Plus, ChevronDown, BookOpen, X } from 'lucide-react';
+import ActiveTabSummary from './ActiveTabSummary';
 
 interface ChatInputProps {
     onToggleHistory: () => void;
@@ -47,6 +48,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onToggleHistory }) => {
 
     return (
         <div className="border-t border-[var(--chrome-border)] bg-[var(--chrome-bg)] p-3 shrink-0">
+            {/* Active Tab Summary */}
+            <ActiveTabSummary />
+
             {/* Toolbar above input */}
             <div className="flex items-center justify-between mb-3 px-1">
                 <div className="flex items-center gap-3">
