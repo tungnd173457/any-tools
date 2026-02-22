@@ -33,7 +33,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onToggleHistory }) => {
         const ta = textareaRef.current;
         if (ta) {
             ta.style.height = 'auto';
-            ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+            ta.style.height = Math.min(ta.scrollHeight, 150) + 'px';
         }
     }, [text]);
 
@@ -147,7 +147,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onToggleHistory }) => {
                     onKeyDown={handleKeyDown}
                     placeholder={screenshotImage ? "Ask about this screenshot..." : "Ask anything, @ models, / prompts"}
                     rows={1}
-                    className="w-full bg-transparent text-[var(--chrome-text)] text-sm resize-none outline-none placeholder:opacity-30 px-4 py-3 max-h-[120px] pr-10"
+                    className="w-full bg-transparent text-[var(--chrome-text)] text-sm resize-none outline-none placeholder:opacity-30 px-4 pt-4 pb-2 min-h-[80px] max-h-[150px] pr-10"
                 />
 
                 {/* Visual Bottom Actions inside input (optional, referencing the image style) */}

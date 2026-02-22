@@ -10,6 +10,7 @@
         "tabs"
     ],
     "host_permissions": [
+        "<all_urls>",
         "https://translate-pa.googleapis.com/*",
         "https://api.openai.com/*"
     ],
