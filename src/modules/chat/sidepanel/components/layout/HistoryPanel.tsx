@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { useChatContext } from '../context/ChatContext';
+import { useChatContext } from '../../context/ChatContext';
 import { X, Search, Trash2, MessageSquare, MonitorSmartphone } from 'lucide-react';
-import { ChatConversation } from '../types';
+import { ChatConversation } from '../../types';
 
 interface HistoryPanelProps {
     onClose: () => void;

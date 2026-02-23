@@ -1,5 +1,5 @@
 import React from 'react';
-import { useChatContext } from '../context/ChatContext';
+import { useChatContext } from '../../context/ChatContext';
 import {
     Highlighter,
     MonitorSmartphone,

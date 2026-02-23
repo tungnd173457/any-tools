@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { useChatContext } from '../context/ChatContext';
+import { useChatContext } from '../../context/ChatContext';
 import MessageBubble from './MessageBubble';
-import TypingIndicator from './TypingIndicator';
+import TypingIndicator from '../shared/TypingIndicator';
 
 const MessageList: React.FC = () => {
     const { messages, isStreaming } = useChatContext();

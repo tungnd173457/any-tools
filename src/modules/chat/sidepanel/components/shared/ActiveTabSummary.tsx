@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useChatContext } from '../context/ChatContext';
+import { useChatContext } from '../../context/ChatContext';
 import { Bookmark } from 'lucide-react';
 
 const ActiveTabSummary: React.FC = () => {

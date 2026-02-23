@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useChatContext } from '../context/ChatContext';
+import { useChatContext } from '../../context/ChatContext';
 import { Scissors, Paperclip, History, Plus, ChevronDown, BookOpen, X } from 'lucide-react';
-import ActiveTabSummary from './ActiveTabSummary';
+import ActiveTabSummary from '../shared/ActiveTabSummary';
 
 interface ChatInputProps {
     onToggleHistory: () => void;

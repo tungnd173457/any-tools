@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useChatContext } from '../context/ChatContext';
+import { useChatContext } from '../../context/ChatContext';
 import { Sparkles, FileText, HelpCircle, X } from 'lucide-react';
 
 const SelectionContext: React.FC = () => {

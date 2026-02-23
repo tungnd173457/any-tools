@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { useChatContext } from '../context/ChatContext';
+import { useChatContext } from '../../context/ChatContext';
 
-import MessageList from './MessageList';
-import ChatInput from './ChatInput';
+import MessageList from '../chat/MessageList';
+import ChatInput from '../chat/ChatInput';
 import HistoryPanel from './HistoryPanel';
-import WelcomeScreen from './WelcomeScreen';
-import ErrorBanner from './ErrorBanner';
-import SelectionContext from './SelectionContext';
+import WelcomeScreen from '../chat/WelcomeScreen';
+import ErrorBanner from '../shared/ErrorBanner';
+import SelectionContext from '../shared/SelectionContext';
 
 const ChatLayout: React.FC = () => {
     const { messages, error, clearError } = useChatContext();

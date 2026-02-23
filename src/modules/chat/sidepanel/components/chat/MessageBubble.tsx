@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Bot, User, Globe } from 'lucide-react';
-import { ChatMessage } from '../types';
+import { ChatMessage } from '../../types';
 
 interface MessageBubbleProps {
     message: ChatMessage;
