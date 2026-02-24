@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSettings } from '../../context/SettingsContext';
-import { POPUP_MODES } from '../../constants';
+import { POPUP_MODES } from '../../../shared/constants';
 
 const GeneralTab: React.FC = () => {
     const { settings, handleSave } = useSettings();

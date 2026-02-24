@@ -22,6 +22,7 @@ interface ChatContextType {
     loadConversation: (id: string) => void;
     deleteConversation: (id: string) => void;
     setModel: (model: string) => void;
+    setServiceProvider: (provider: 'custom' | 'webapp') => void;
     clearError: () => void;
 }
 
@@ -47,7 +48,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [currentConversation, setCurrentConversation] = useState<ChatConversation | null>(null);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [isStreaming, setIsStreaming] = useState(false);
-    const [settings, setSettings] = useState<ChatSettings>({ openaiApiKey: '', chatModel: 'gpt-4.1-mini' });
+    const [settings, setSettings] = useState<ChatSettings>({ openaiApiKey: '', chatModel: 'gpt-4.1-mini', serviceProvider: 'custom' });
     const [error, setError] = useState<string | null>(null);
     const [selectedText, setSelectedText] = useState<string>('');
     const [screenshotImage, setScreenshotImage] = useState<string | null>(null);
@@ -81,10 +82,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Load settings
     useEffect(() => {
-        chrome.storage.sync.get({ openaiApiKey: '', chatModel: 'gpt-4.1-mini' }, (data) => {
+        chrome.storage.sync.get({ openaiApiKey: '', chatModel: 'gpt-4.1-mini', serviceProvider: 'custom' }, (data) => {
             setSettings({
                 openaiApiKey: (data.openaiApiKey as string) || '',
-                chatModel: (data.chatModel as string) || 'gpt-4.1-mini'
+                chatModel: (data.chatModel as string) || 'gpt-4.1-mini',
+                serviceProvider: (data.serviceProvider as 'custom' | 'webapp') || 'custom'
             });
         });
 
@@ -95,6 +97,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 }
                 if (changes.chatModel) {
                     setSettings(prev => ({ ...prev, chatModel: (changes.chatModel.newValue as string) || 'gpt-4.1-mini' }));
+                }
+                if (changes.serviceProvider) {
+                    setSettings(prev => ({ ...prev, serviceProvider: (changes.serviceProvider.newValue as 'custom' | 'webapp') || 'custom' }));
                 }
             }
         };
@@ -142,6 +147,11 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const setModel = useCallback((model: string) => {
         setSettings(prev => ({ ...prev, chatModel: model }));
         chrome.storage.sync.set({ chatModel: model });
+    }, []);
+
+    const setServiceProvider = useCallback((provider: 'custom' | 'webapp') => {
+        setSettings(prev => ({ ...prev, serviceProvider: provider }));
+        chrome.storage.sync.set({ serviceProvider: provider });
     }, []);
 
     const sendMessage = useCallback((text: string) => {
@@ -283,6 +293,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
             loadConversation,
             deleteConversation,
             setModel,
+            setServiceProvider,
             clearError,
         }}>
             {children}

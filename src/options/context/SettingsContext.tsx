@@ -30,7 +30,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
         popupMode: 'button',
         googleApiKey: '',
         openaiApiKey: '',
-        chatModel: 'gpt-4.1-mini'
+        chatModel: 'gpt-4.1-mini',
+        serviceProvider: 'custom'
     });
     const [status, setStatus] = useState<StatusMessage>({ message: '', type: '' });
 
@@ -41,7 +42,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({ children }
             popupMode: 'button',
             googleApiKey: '',
             openaiApiKey: '',
-            chatModel: 'gpt-4.1-mini'
+            chatModel: 'gpt-4.1-mini',
+            serviceProvider: 'custom'
         }, (res) => {
             setSettings(res as unknown as Settings);
         });

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSettings } from '../../context/SettingsContext';
-import { LANGUAGES } from '../../constants';
+import { LANGUAGES } from '../../../shared/constants';
 import { Eye, EyeOff } from 'lucide-react';
 
 const TranslateTab: React.FC = () => {

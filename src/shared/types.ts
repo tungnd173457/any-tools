@@ -5,6 +5,7 @@ export interface Settings {
     googleApiKey?: string;
     openaiApiKey?: string;
     chatModel?: string;
+    serviceProvider?: 'custom' | 'webapp';
 }
 
 export interface TranslationResult {
@@ -53,6 +54,7 @@ export interface ChatConversation {
 export interface ChatSettings {
     openaiApiKey: string;
     chatModel: string;
+    serviceProvider?: 'custom' | 'webapp';
 }
 
 export interface ChatSendMessage {
