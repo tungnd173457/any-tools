@@ -1,151 +1,326 @@
-/* Styles for translation popup */
+/* ── Quick Translate content styles ─────────────────────────────── */
 
+/* ── Trigger button ─────────────────────────────────────────────── */
 .quick-translate-button {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 10px;
-  border-radius: 8px;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 20px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(102, 126, 234, 0.5), 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
+  gap: 5px;
+  height: 28px;
+  white-space: nowrap;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  animation: qt-btn-pop 0.14s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  user-select: none;
+}
+
+@keyframes qt-btn-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.72) translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .quick-translate-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.5);
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.6);
+}
+
+.quick-translate-button:active {
+  transform: scale(0.96);
 }
 
 .quick-translate-button svg {
-  width: 20px;
-  height: 20px;
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
 }
 
+/* ── Popup card ─────────────────────────────────────────────────── */
 .quick-translate-popup {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  min-width: 300px;
-  max-width: 450px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.07),
+    0 12px 40px rgba(0, 0, 0, 0.14),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+  width: 360px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   overflow: hidden;
-  animation: slideIn 0.2s ease-out;
+  animation: qt-popup-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-@keyframes slideIn {
+@keyframes qt-popup-in {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(6px) scale(0.97);
   }
+
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
-.translate-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 12px 16px;
+/* ── Header: language bar ───────────────────────────────────────── */
+.qt-header {
+  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4c1d95 100%);
+  padding: 10px 12px;
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  gap: 6px;
 }
 
-.translate-title {
-  font-weight: 600;
-  font-size: 14px;
-}
-
-.translate-close {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 24px;
+.qt-lang-select {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border-radius: 8px;
+  padding: 5px 8px 5px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
   cursor: pointer;
-  padding: 0;
-  width: 24px;
-  height: 24px;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='rgba(255,255,255,0.6)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+  transition: background-color 0.15s, border-color 0.15s;
+  max-width: 140px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qt-lang-select:hover,
+.qt-lang-select:focus {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.qt-lang-select option {
+  background: #312e81;
+  color: #fff;
+}
+
+.qt-swap-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  transition: background 0.2s;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.2s;
+  flex-shrink: 0;
+  padding: 0;
 }
 
-.translate-close:hover {
+.qt-swap-btn:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: rotate(180deg);
+}
+
+.qt-close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 7px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.qt-close-btn:hover {
   background: rgba(255, 255, 255, 0.2);
+  color: #fff;
 }
 
-.translate-content {
-  padding: 16px;
+/* ── Body ───────────────────────────────────────────────────────── */
+.qt-body {
+  padding: 0;
 }
 
-.translate-original,
-.translate-result {
-  margin-bottom: 12px;
+.qt-section {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f0f0f5;
 }
 
-.translate-result {
-  margin-bottom: 0;
+.qt-section:last-child {
+  border-bottom: none;
 }
 
-.translate-label {
+.qt-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+  color: #a0a0b8;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.qt-section-label svg {
+  opacity: 0.6;
+}
+
+.qt-text {
+  font-size: 14px;
+  line-height: 1.65;
+  color: #374151;
+  word-break: break-word;
+}
+
+.qt-text-result {
+  font-size: 15px;
+  font-weight: 500;
+  color: #111827;
+  letter-spacing: -0.01em;
+}
+
+/* ── Detected language badge ────────────────────────────────────── */
+.qt-detected {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f0f4ff;
+  color: #4f46e5;
+  border-radius: 20px;
+  padding: 2px 8px;
   font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
-  color: #667eea;
-  margin-bottom: 6px;
-  letter-spacing: 0.5px;
+  margin-top: 4px;
 }
 
-.translate-text {
-  font-size: 14px;
-  line-height: 1.6;
-  color: #333;
+/* ── Footer: copy button ────────────────────────────────────────── */
+.qt-footer {
+  padding: 8px 14px 10px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  border-top: 1px solid #f0f0f5;
 }
 
-.translate-text-result {
-  font-weight: 500;
-  color: #000;
+.qt-copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: #f5f3ff;
+  color: #6d28d9;
+  border: none;
+  border-radius: 7px;
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
 }
 
-.translate-loading {
-  padding: 24px;
+.qt-copy-btn:hover {
+  background: #ede9fe;
+  transform: translateY(-1px);
+}
+
+.qt-copy-btn:active {
+  transform: scale(0.96);
+}
+
+.qt-copy-btn.copied {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* ── Loading state ──────────────────────────────────────────────── */
+.qt-loading {
+  padding: 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
 }
 
-.loading-spinner {
+.qt-spinner {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid #e9d5ff;
+  border-top-color: #7c3aed;
+  border-radius: 50%;
+  animation: qt-spin 0.75s linear infinite;
+}
+
+@keyframes qt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.qt-loading span {
+  color: #9ca3af;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+/* ── Error state ────────────────────────────────────────────────── */
+.qt-error {
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.qt-error-icon {
   width: 32px;
   height: 32px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #667eea;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  background: #fef2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #ef4444;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+.qt-error-content {
+  flex: 1;
 }
 
-.translate-loading span {
-  color: #666;
-  font-size: 14px;
+.qt-error-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #dc2626;
+  margin-bottom: 2px;
 }
 
-.translate-error {
-  color: #e53e3e;
-  font-size: 14px;
-  padding: 8px;
-  background: #fff5f5;
-  border-radius: 6px;
-  border-left: 3px solid #e53e3e;
+.qt-error-msg {
+  font-size: 12px;
+  color: #9ca3af;
+  line-height: 1.4;
 }
