@@ -4,6 +4,8 @@ export interface ChatMessage {
     content: string;
     timestamp: number;
     imageUrl?: string; // base64 data URL for screenshot images
+    isStreaming?: boolean; // true while the message is still being streamed
+    model?: string; // the model that generated this response (e.g. 'gpt-4.1-mini')
 }
 
 export interface ChatConversation {

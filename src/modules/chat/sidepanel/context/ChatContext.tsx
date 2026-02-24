@@ -58,24 +58,106 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const conversationsRef = useRef(conversations);
     const currentConvoRef = useRef(currentConversation);
     const screenshotRef = useRef(screenshotImage);
+    const settingsRef = useRef(settings);
     messagesRef.current = messages;
     conversationsRef.current = conversations;
     currentConvoRef.current = currentConversation;
     screenshotRef.current = screenshotImage;
+    settingsRef.current = settings;
 
-    // Listen for text selection and screenshot from content script / background
+    // Active stream tracking
+    const activeStreamIdRef = useRef<string | null>(null);
+    // The id of the assistant message being streamed into
+    const streamingMsgIdRef = useRef<string | null>(null);
+
+    // Listen for text selection, screenshots, and stream tokens from content script / background
     useEffect(() => {
-        const handleMessage = (request: any, sender: any, sendResponse: any) => {
+        const handleMessage = (request: any) => {
             if (request.action === 'textSelected') {
                 setSelectedText(request.text || '');
+                return;
             }
             if (request.action === 'screenshotCaptured') {
                 setScreenshotImage(request.imageUrl || null);
+                return;
             }
             if (request.action === 'screenshotError') {
                 setError(request.error || 'Screenshot capture failed');
+                return;
+            }
+
+            // --- Streaming handlers ---
+            if (request.action === 'chatStreamToken') {
+                if (request.streamId !== activeStreamIdRef.current) return;
+
+                const token: string = request.token;
+                const msgId = streamingMsgIdRef.current;
+
+                setMessages(prev => {
+                    const existing = prev.find(m => m.id === msgId);
+                    if (existing) {
+                        // Append token to existing streaming message
+                        return prev.map(m =>
+                            m.id === msgId ? { ...m, content: m.content + token } : m
+                        );
+                    } else {
+                        // First token — create the assistant message
+                        const assistantMsg: ChatMessage = {
+                            id: msgId!,
+                            role: 'assistant',
+                            content: token,
+                            timestamp: Date.now(),
+                            isStreaming: true,
+                            model: settingsRef.current.chatModel,
+                        };
+                        return [...prev, assistantMsg];
+                    }
+                });
+                return;
+            }
+
+            if (request.action === 'chatStreamDone') {
+                if (request.streamId !== activeStreamIdRef.current) return;
+                activeStreamIdRef.current = null;
+
+                const msgId = streamingMsgIdRef.current;
+                const finalModel = request.model || settingsRef.current.chatModel;
+                streamingMsgIdRef.current = null;
+                setIsStreaming(false);
+
+                // Finalize the streaming message (remove isStreaming flag, update model) and persist
+                setMessages(prev => {
+                    const finalized = prev.map(m =>
+                        m.id === msgId ? { ...m, isStreaming: false, model: finalModel } : m
+                    );
+
+                    // Persist conversation with finalized messages
+                    const convoId = currentConvoRef.current?.id;
+                    if (convoId) {
+                        const updatedConvos = conversationsRef.current.map(c =>
+                            c.id === convoId ? { ...c, messages: finalized, updatedAt: Date.now() } : c
+                        );
+                        setConversations(updatedConvos);
+                        chrome.storage.local.set({ chatConversations: updatedConvos });
+                        setCurrentConversation(prev2 =>
+                            prev2 ? { ...prev2, messages: finalized, updatedAt: Date.now() } : prev2
+                        );
+                    }
+
+                    return finalized;
+                });
+                return;
+            }
+
+            if (request.action === 'chatStreamError') {
+                if (request.streamId !== activeStreamIdRef.current) return;
+                activeStreamIdRef.current = null;
+                streamingMsgIdRef.current = null;
+                setIsStreaming(false);
+                setError(request.error || 'Unknown error occurred');
             }
         };
+
         chrome.runtime.onMessage.addListener(handleMessage);
         return () => chrome.runtime.onMessage.removeListener(handleMessage);
     }, []);
@@ -212,13 +294,16 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setConversations(updatedConvos);
         persistConversations(updatedConvos);
 
-        // Send to background
+        // Prepare a new stream ID and assistant message ID
+        const streamId = generateId();
+        const assistantMsgId = generateId();
+        activeStreamIdRef.current = streamId;
+        streamingMsgIdRef.current = assistantMsgId;
         setIsStreaming(true);
 
         // Build API messages - use OpenAI Vision format if any message has an image
         const apiMessages = newMessages.map(m => {
             if (m.imageUrl) {
-                // Vision API format: content is an array of parts
                 return {
                     role: m.role,
                     content: [
@@ -235,43 +320,20 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         chrome.runtime.sendMessage(
             {
-                action: 'chatSend',
+                action: 'chatSendStream',
                 messages: apiMessages,
                 model: settings.chatModel,
                 apiKey: settings.openaiApiKey,
+                streamId,
             },
             (response) => {
-                setIsStreaming(false);
-
                 if (chrome.runtime.lastError) {
+                    activeStreamIdRef.current = null;
+                    streamingMsgIdRef.current = null;
+                    setIsStreaming(false);
                     setError('Connection error: ' + chrome.runtime.lastError.message);
-                    return;
                 }
-
-                if (response?.success) {
-                    const assistantMsg: ChatMessage = {
-                        id: generateId(),
-                        role: 'assistant',
-                        content: response.data.content,
-                        timestamp: Date.now(),
-                    };
-
-                    setMessages(prev => {
-                        const withAssistant = [...prev, assistantMsg];
-
-                        // Persist
-                        const latestConvos = conversationsRef.current.map(c =>
-                            c.id === convoId ? { ...c, messages: withAssistant, updatedAt: Date.now() } : c
-                        );
-                        setConversations(latestConvos);
-                        persistConversations(latestConvos);
-                        setCurrentConversation(prev2 => prev2 ? { ...prev2, messages: withAssistant, updatedAt: Date.now() } : prev2);
-
-                        return withAssistant;
-                    });
-                } else {
-                    setError(response?.error || 'Unknown error occurred');
-                }
+                // If ack not success, the background will send chatStreamError separately
             }
         );
     }, [isStreaming, settings, persistConversations, selectedText]);

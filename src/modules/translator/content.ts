@@ -117,7 +117,7 @@ function handleTextSelection(event: MouseEvent | KeyboardEvent) {
     } else if (settings.popupMode === 'auto') {
       translateText(selectedText, rect);
     }
-  }, 50);
+  }, 200);
 }
 
 // ── Translate trigger button ──────────────────────────────────────────────────
@@ -155,8 +155,6 @@ function removeTranslateButton() {
 
 // ── Translation call ──────────────────────────────────────────────────────────
 function translateText(text: string, rect: DOMRect) {
-  showLoadingPopup(rect);
-
   chrome.runtime.sendMessage(
     { action: 'translate', text, sourceLang: settings.sourceLang, targetLang: settings.targetLang },
     (response: TranslationResponse) => {
@@ -168,20 +166,6 @@ function translateText(text: string, rect: DOMRect) {
       }
     }
   );
-}
-
-// ── Loading popup ─────────────────────────────────────────────────────────────
-function showLoadingPopup(rect: DOMRect) {
-  removeTranslationPopup();
-  translationPopup = document.createElement('div');
-  translationPopup.className = 'quick-translate-popup';
-  translationPopup.innerHTML = `
-      <div class="qt-loading">
-        <div class="qt-spinner"></div>
-        <span>Translating…</span>
-      </div>
-    `;
-  positionPopup(translationPopup, rect);
 }
 
 // ── Result popup ──────────────────────────────────────────────────────────────

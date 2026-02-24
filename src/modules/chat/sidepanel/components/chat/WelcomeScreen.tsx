@@ -27,8 +27,8 @@ const WelcomeScreen: React.FC = () => {
             <div className="px-6 pb-10 max-w-2xl mx-auto w-full flex flex-col items-start">
 
                 {/* Greeting */}
-                <h1 className="text-4xl font-bold mb-2 opacity-90">Hi,</h1>
-                <h2 className="text-2xl font-semibold opacity-90 mb-8">How can I assist you today?</h2>
+                <h1 className="text-4xl font-medium mb-2 opacity-90">Hi,</h1>
+                <h2 className="text-2xl font-medium opacity-90 mb-8">How can I assist you today?</h2>
 
                 {/* Top Actions (Mock functionality for now) */}
                 <div className="flex flex-wrap gap-2 mb-10">

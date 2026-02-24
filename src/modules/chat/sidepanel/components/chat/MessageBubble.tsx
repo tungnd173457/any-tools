@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { Bot, User, Globe } from 'lucide-react';
+import { Globe } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { ChatMessage } from '../../types';
+import { CUSTOM_MODELS, WEBAPP_MODELS } from '../../../../../shared/constants';
 
 interface MessageBubbleProps {
     message: ChatMessage;
@@ -10,36 +13,72 @@ function formatTime(ts: number): string {
     return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-function formatContent(content: string): string {
-    // Basic Markdown parser (for demonstration purposes)
-    // In a real app, use 'react-markdown' or 'marked'
-    let html = content
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-    // Code blocks
-    html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, (_match, _lang, code) => {
-        return `<pre class="bg-black/30 p-2 rounded text-xs overflow-x-auto my-2"><code>${code.trim()}</code></pre>`;
-    });
-
-    // Inline code
-    html = html.replace(/`([^`]+)`/g, '<code class="bg-white/10 px-1 py-0.5 rounded text-[12px] font-mono">$1</code>');
-
-    // Bold
-    html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-
-    // Italic
-    html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
-
-    // Line breaks (convert \n to <br> but avoid inside <pre>)
-    // This simple regex approach is flawed for nested structures but suffices for basic chat
-    html = html.replace(/\n/g, '<br/>');
-
-    return html;
+/**
+ * Map a model value (e.g. "gpt-4.1-mini") to the icon filename in /icons/.
+ */
+function getModelIcon(model?: string): string | null {
+    if (!model) return null;
+    if (model.startsWith('gpt-4.1')) return 'icons/gpt-4.1.svg';
+    if (model.startsWith('gpt-4o')) return 'icons/gpt-4o.svg';
+    if (model.startsWith('gpt-5')) return 'icons/gpt-5.svg';
+    return null;
 }
+
+/**
+ * Map a model value to a human-readable display name using the constants.
+ * Uses prefix matching so API-returned names like "gpt-4o-mini-2024-07-18"
+ * correctly resolve to "GPT-4o Mini".
+ */
+function getModelDisplayName(model?: string): string {
+    if (!model) return 'AI';
+    const allModels = [...CUSTOM_MODELS, ...WEBAPP_MODELS];
+    const exact = allModels.find(m => m.value === model);
+    if (exact) return exact.label;
+    const sorted = [...allModels].sort((a, b) => b.value.length - a.value.length);
+    const prefix = sorted.find(m => model.startsWith(m.value));
+    if (prefix) return prefix.label;
+    return model;
+}
+
+// ─── Markdown custom components ───────────────────────────────────────────────
+
+const MarkdownComponents: Record<string, React.FC<any>> = {
+    // Code blocks & inline code
+    code({ inline, className, children, ...props }: any) {
+        const match = /language-(\w+)/.exec(className || '');
+        const lang = match ? match[1] : '';
+
+        if (!inline && (lang || String(children).includes('\n'))) {
+            return (
+                <div className="code-block-wrapper">
+                    {lang && <div className="code-lang">{lang}</div>}
+                    <pre>
+                        <code className={className} {...props}>
+                            {children}
+                        </code>
+                    </pre>
+                </div>
+            );
+        }
+
+        return (
+            <code className="inline-code" {...props}>
+                {children}
+            </code>
+        );
+    },
+
+    // Make links open in new tab
+    a({ children, href, ...props }: any) {
+        return (
+            <a href={href} target="_blank" rel="noreferrer" {...props}>
+                {children}
+            </a>
+        );
+    },
+};
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 const ImagePreview: React.FC<{ src: string }> = ({ src }) => {
     const [expanded, setExpanded] = useState(false);
@@ -126,6 +165,8 @@ const PageContextBox: React.FC<{ title: string; url: string; favicon: string; co
     );
 };
 
+// ─── Main component ───────────────────────────────────────────────────────────
+
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     const isUser = message.role === 'user';
 
@@ -158,15 +199,13 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                     {contextText && <ContextBox text={contextText} />}
                     {pageContext && <PageContextBox {...pageContext} />}
                     <div className="bg-[#f0f0f0] dark:bg-[#2f2f2f] text-black dark:text-white rounded-2xl px-4 py-2.5 text-[14px] leading-relaxed shadow-sm self-end">
-                        {/* Show screenshot image if present */}
                         {message.imageUrl && (
                             <ImagePreview src={message.imageUrl} />
                         )}
                         {displayContent && (
-                            <div
-                                className="msg-content break-words"
-                                dangerouslySetInnerHTML={{ __html: formatContent(displayContent) }}
-                            />
+                            <div className="msg-content break-words">
+                                {displayContent}
+                            </div>
                         )}
                     </div>
                 </div>
@@ -174,27 +213,44 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         );
     }
 
-    // AI message — full width
+    // AI message — full width, left-aligned, content flush with icon
+    const modelName = getModelDisplayName(message.model);
+    const modelIconPath = getModelIcon(message.model);
+
     return (
-        <div className="mb-6 flex gap-3 group">
-            <div className="shrink-0 mt-0.5">
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-violet-500/20">
-                    <Bot className="w-3.5 h-3.5 text-white" />
+        <div className="mb-4 group ai-message">
+            {/* Header row: icon + model name */}
+            <div className="flex items-center gap-2 mb-3">
+                <div className="shrink-0">
+                    {modelIconPath ? (
+                        <img
+                            src={chrome.runtime.getURL(modelIconPath)}
+                            alt={modelName}
+                            className="w-[18px] h-[18px] rounded-full object-contain"
+                        />
+                    ) : (
+                        <div className="w-[18px] h-[18px] rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center">
+                            <span className="text-[8px] text-white font-medium">AI</span>
+                        </div>
+                    )}
                 </div>
+                <span className="text-[14px] font-medium text-[var(--chrome-text)]">{modelName}</span>
+                {!message.isStreaming && (
+                    <span className="text-[10px] opacity-30 mt-0.5">{formatTime(message.timestamp)}</span>
+                )}
+                {message.isStreaming && (
+                    <span className="text-[10px] opacity-40 animate-pulse mt-0.5">Đang trả lời…</span>
+                )}
             </div>
 
-            <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                    <span className="text-[12px] font-medium opacity-90">AI</span>
-                    <span className="text-[10px] opacity-30">{formatTime(message.timestamp)}</span>
-                </div>
-
-                <div className="text-[var(--chrome-text)] opacity-90 text-[14px] leading-relaxed">
-                    <div
-                        className="msg-content prose prose-invert prose-sm max-w-none break-words"
-                        dangerouslySetInnerHTML={{ __html: formatContent(message.content) }}
-                    />
-                </div>
+            {/* Content: flush left, rendered with react-markdown */}
+            <div className="msg-content text-[var(--chrome-text)] text-[14px] leading-[1.6]">
+                <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={MarkdownComponents}
+                >
+                    {message.content}
+                </ReactMarkdown>
             </div>
         </div>
     );

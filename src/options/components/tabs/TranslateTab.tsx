@@ -9,7 +9,7 @@ const TranslateTab: React.FC = () => {
 
     return (
         <div className="animate-in fade-in duration-300">
-            <h2 className="text-[17px] font-bold text-[#1e293b] mb-4">Translate settings</h2>
+            <h2 className="text-[17px] font-medium text-[#1e293b] mb-4">Translate settings</h2>
 
             <div className="border border-gray-200 rounded-xl overflow-hidden mb-8">
                 <div className="flex items-center justify-between p-4 bg-white border-b border-gray-100">

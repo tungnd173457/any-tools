@@ -45,7 +45,7 @@ const ToolbarDropdown: React.FC<ToolbarDropdownProps> = ({ value, label, options
                         <button
                             key={opt.value}
                             onClick={() => { onChange(opt.value); setOpen(false); }}
-                            className={`w-full text-left px-3 py-2 text-xs whitespace-nowrap transition-colors ${opt.value === value ? 'bg-[var(--chrome-text)]/10 font-semibold text-[var(--chrome-text)]' : 'text-[var(--chrome-text)] hover:bg-[var(--chrome-text)]/5'}`}
+                            className={`w-full text-left px-3 py-2 text-xs whitespace-nowrap transition-colors ${opt.value === value ? 'bg-[var(--chrome-text)]/10 font-medium text-[var(--chrome-text)]' : 'text-[var(--chrome-text)] hover:bg-[var(--chrome-text)]/5'}`}
                         >
                             {opt.label}
                         </button>

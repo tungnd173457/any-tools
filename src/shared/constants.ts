@@ -28,7 +28,7 @@ export const WEBAPP_MODELS = [
     { value: 'auto', label: 'Auto' },
     { value: 'gpt-5', label: 'GPT-5' },
     { value: 'gpt-5-mini', label: 'GPT-5 Mini' },
-    { value: 'gpt-5-t-mini', label: 'GPT-5-T Mini' },
+    { value: 'gpt-5-t-mini', label: 'GPT-5-Thinking Mini' },
     { value: 'gpt-5.1', label: 'GPT-5.1' },
     { value: 'gpt-5.2', label: 'GPT-5.2' },
 ];

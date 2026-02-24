@@ -10,35 +10,33 @@ chrome.action.onClicked.addListener((tab) => {
 
 interface OpenAIMessage {
     role: string;
-    content: string;
+    content: string | any[];
 }
 
-interface ChatResult {
-    content: string;
-    model: string;
-    usage?: {
-        prompt_tokens: number;
-        completion_tokens: number;
-        total_tokens: number;
-    };
-}
-
-async function handleChatRequest(
+// Stream chat response, sending token chunks back via runtime messages
+async function handleChatStreamRequest(
     messages: OpenAIMessage[],
     model: string,
-    apiKey: string
-): Promise<ChatResult> {
+    apiKey: string,
+    streamId: string
+): Promise<void> {
     if (!apiKey) {
-        throw new Error('OpenAI API key not configured. Please set it in extension options.');
+        chrome.runtime.sendMessage({
+            action: 'chatStreamError',
+            streamId,
+            error: 'OpenAI API key not configured. Please set it in extension options.',
+        });
+        return;
     }
 
     const url = 'https://api.openai.com/v1/chat/completions';
 
     const body = {
-        model: model,
-        messages: messages,
+        model,
+        messages,
         temperature: 0.7,
         max_tokens: 4096,
+        stream: true,
     };
 
     try {
@@ -54,25 +52,75 @@ async function handleChatRequest(
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             const errorMessage = errorData?.error?.message || `API request failed with status ${response.status}`;
-            throw new Error(errorMessage);
+            chrome.runtime.sendMessage({ action: 'chatStreamError', streamId, error: errorMessage });
+            return;
         }
 
-        const data = await response.json();
-
-        if (!data.choices || data.choices.length === 0) {
-            throw new Error('No response from AI model');
+        if (!response.body) {
+            chrome.runtime.sendMessage({ action: 'chatStreamError', streamId, error: 'No response body' });
+            return;
         }
 
-        return {
-            content: data.choices[0].message.content,
-            model: data.model,
-            usage: data.usage,
-        };
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
+        let finalModel = model;
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+
+            // Process complete SSE lines
+            const lines = buffer.split('\n');
+            // Keep the last (possibly incomplete) line in the buffer
+            buffer = lines.pop() ?? '';
+
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed === 'data: [DONE]') {
+                    if (trimmed === 'data: [DONE]') {
+                        // Stream fully complete
+                        chrome.runtime.sendMessage({ action: 'chatStreamDone', streamId, model: finalModel });
+                        return;
+                    }
+                    continue;
+                }
+
+                if (trimmed.startsWith('data: ')) {
+                    const jsonStr = trimmed.slice(6);
+                    try {
+                        const parsed = JSON.parse(jsonStr);
+                        if (parsed.model) finalModel = parsed.model;
+                        const delta = parsed.choices?.[0]?.delta;
+                        if (delta?.content) {
+                            chrome.runtime.sendMessage({
+                                action: 'chatStreamToken',
+                                streamId,
+                                token: delta.content,
+                            });
+                        }
+                        // Check finish_reason
+                        if (parsed.choices?.[0]?.finish_reason === 'stop') {
+                            chrome.runtime.sendMessage({ action: 'chatStreamDone', streamId, model: finalModel });
+                            return;
+                        }
+                    } catch {
+                        // Ignore malformed JSON chunks
+                    }
+                }
+            }
+        }
+
+        // If we exit the loop without a [DONE] signal, still mark done
+        chrome.runtime.sendMessage({ action: 'chatStreamDone', streamId, model: finalModel });
+
     } catch (error: any) {
-        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            throw new Error('Network error. Please check your internet connection.');
-        }
-        throw error;
+        const msg = error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')
+            ? 'Network error. Please check your internet connection.'
+            : error.message || 'Unknown error';
+        chrome.runtime.sendMessage({ action: 'chatStreamError', streamId, error: msg });
     }
 }
 
@@ -108,11 +156,12 @@ async function cropScreenshot(dataUrl: string, rect: { x: number; y: number; wid
 
 // Listen for chat messages from sidePanel
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'chatSend') {
-        handleChatRequest(request.messages, request.model, request.apiKey)
-            .then(result => sendResponse({ success: true, data: result }))
-            .catch(error => sendResponse({ success: false, error: error.message }));
-        return true; // Keep message channel open for async
+    if (request.action === 'chatSendStream') {
+        // Fire-and-forget: kicks off the streaming fetch independently
+        handleChatStreamRequest(request.messages, request.model, request.apiKey, request.streamId);
+        // Acknowledge immediately so the port doesn't time out
+        sendResponse({ success: true });
+        return true;
     }
 
     if (request.action === 'screenshotAreaSelected') {

@@ -21,7 +21,7 @@ const AssistantTab: React.FC = () => {
 
     return (
         <div className="animate-in fade-in duration-300">
-            <h2 className="text-[17px] font-bold text-[#1e293b] mb-4">AI access</h2>
+            <h2 className="text-[17px] font-medium text-[#1e293b] mb-4">AI access</h2>
 
             <div className="border border-gray-200 rounded-xl bg-white mb-3 flex flex-col">
                 <div className="flex items-center justify-between p-4 border-b border-gray-100" ref={dropdownRef}>

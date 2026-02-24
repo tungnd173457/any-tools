@@ -82,7 +82,7 @@ const ActiveTabSummary: React.FC = () => {
             <div className="flex items-center gap-3 flex-shrink-0">
                 <button
                     onClick={handleSummarize}
-                    className="text-sm font-semibold text-[#8b5cf6] dark:text-[#a855f7] hover:text-[#7c3aed] transition-colors whitespace-nowrap"
+                    className="text-sm font-medium text-[#8b5cf6] dark:text-[#a855f7] hover:text-[#7c3aed] transition-colors whitespace-nowrap"
                 >
                     Summarize
                 </button>

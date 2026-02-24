@@ -12,7 +12,7 @@ const ChatHeader: React.FC = () => {
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shrink-0 shadow-lg shadow-violet-500/20">
                     <Sparkles className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-sm font-semibold text-white/90 truncate">
+                <span className="text-sm font-medium text-white/90 truncate">
                     {currentConversation?.title || 'Any Tools'}
                 </span>
             </div>

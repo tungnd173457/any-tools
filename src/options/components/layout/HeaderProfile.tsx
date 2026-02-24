@@ -8,7 +8,7 @@ const HeaderProfile: React.FC = () => {
                     t
                 </div>
                 <div>
-                    <div className="font-semibold text-gray-800 text-sm">tùng nguyễn</div>
+                    <div className="font-medium text-gray-800 text-sm">tùng nguyễn</div>
                     <div className="text-gray-500 text-sm">tungnd173457@gmail.com</div>
                 </div>
             </div>

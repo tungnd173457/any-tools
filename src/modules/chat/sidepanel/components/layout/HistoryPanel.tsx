@@ -71,7 +71,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onClose }) => {
             {/* Header */}
             <div className="flex items-center justify-between px-5 py-4 shrink-0">
                 <div className="flex items-center gap-2">
-                    <h2 className="text-lg font-bold">Chat history</h2>
+                    <h2 className="text-lg font-medium">Chat history</h2>
                     <span className="opacity-40 text-sm">({conversations.length})</span>
                 </div>
                 <button
@@ -140,7 +140,7 @@ const HistoryPanel: React.FC<HistoryPanelProps> = ({ onClose }) => {
                 ) : (
                     groupedConversations.map(([group, items]) => (
                         <div key={group} className="mb-6">
-                            <div className="px-4 mb-2 text-xs font-semibold opacity-40 uppercase tracking-wider">
+                            <div className="px-4 mb-2 text-xs font-medium opacity-40 uppercase tracking-wider">
                                 {group}
                             </div>
                             <div className="space-y-0.5">
