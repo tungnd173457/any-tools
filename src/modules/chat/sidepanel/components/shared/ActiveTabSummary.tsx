@@ -74,7 +74,7 @@ const ActiveTabSummary: React.FC = () => {
                 ) : (
                     <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded-sm flex-shrink-0" />
                 )}
-                <span className="text-sm font-medium text-[var(--chrome-text)] truncate max-w-[200px]">
+                <span className="text-sm text-[var(--chrome-text)] truncate max-w-[200px]">
                     {tabInfo.title}
                 </span>
             </div>

@@ -11,11 +11,6 @@ chrome.action.onClicked.addListener((tab) => {
 import { handleOpenAIStreamRequest } from './services/OpenAIService';
 import { handleChatGPTStreamRequest } from './services/ChatGPTReversedService';
 
-interface OpenAIMessage {
-    role: string;
-    content: string | any[];
-}
-
 
 // Crop screenshot using OffscreenCanvas (works in service worker)
 async function cropScreenshot(dataUrl: string, rect: { x: number; y: number; width: number; height: number }, devicePixelRatio: number): Promise<string> {

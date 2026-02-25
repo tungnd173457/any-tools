@@ -21,6 +21,7 @@ function getModelIcon(model?: string): string | null {
     if (model.startsWith('gpt-4.1')) return 'icons/gpt-4.1.svg';
     if (model.startsWith('gpt-4o')) return 'icons/gpt-4o.svg';
     if (model.startsWith('gpt-5')) return 'icons/gpt-5.svg';
+    if (model.startsWith('auto')) return 'icons/chatgpt.svg';
     return null;
 }
 
@@ -234,7 +235,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                         </div>
                     )}
                 </div>
-                <span className="text-[14px] font-medium text-[var(--chrome-text)]">{modelName}</span>
+                <span className="text-[14px] font-light text-[var(--chrome-text)]">{modelName}</span>
                 {!message.isStreaming && (
                     <span className="text-[10px] opacity-30 mt-0.5">{formatTime(message.timestamp)}</span>
                 )}

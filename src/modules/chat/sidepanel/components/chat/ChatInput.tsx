@@ -33,7 +33,7 @@ const ToolbarDropdown: React.FC<ToolbarDropdownProps> = ({ value, label, options
         <div ref={ref} className="relative">
             <button
                 onClick={() => setOpen(o => !o)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[var(--chrome-input-bg)] text-[var(--chrome-text)] text-xs font-medium rounded-full border border-[var(--chrome-border)] hover:bg-black/5 dark:hover:bg-white/5 outline-none cursor-pointer transition-colors whitespace-nowrap"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-[var(--chrome-input-bg)] text-[var(--chrome-text)] text-xs rounded-full border border-[var(--chrome-border)] hover:bg-black/5 dark:hover:bg-white/5 outline-none cursor-pointer transition-colors whitespace-nowrap"
             >
                 <span>{label}</span>
                 <ChevronDown className="w-3 h-3 opacity-50 shrink-0" />
@@ -45,7 +45,7 @@ const ToolbarDropdown: React.FC<ToolbarDropdownProps> = ({ value, label, options
                         <button
                             key={opt.value}
                             onClick={() => { onChange(opt.value); setOpen(false); }}
-                            className={`w-full text-left px-3 py-2 text-xs whitespace-nowrap transition-colors ${opt.value === value ? 'bg-[var(--chrome-text)]/10 font-medium text-[var(--chrome-text)]' : 'text-[var(--chrome-text)] hover:bg-[var(--chrome-text)]/5'}`}
+                            className={`w-full text-left px-3 py-2 text-xs whitespace-nowrap transition-colors ${opt.value === value ? 'bg-[var(--chrome-text)]/10 text-[var(--chrome-text)]' : 'text-[var(--chrome-text)] hover:bg-[var(--chrome-text)]/5'}`}
                         >
                             {opt.label}
                         </button>

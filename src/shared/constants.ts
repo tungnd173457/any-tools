@@ -25,12 +25,12 @@ export const CUSTOM_MODELS = [
 ];
 
 export const WEBAPP_MODELS = [
-    { value: 'auto', label: 'Auto' },
-    { value: 'gpt-5', label: 'GPT-5' },
-    { value: 'gpt-5-mini', label: 'GPT-5 Mini' },
-    { value: 'gpt-5-t-mini', label: 'GPT-5-Thinking Mini' },
-    { value: 'gpt-5.1', label: 'GPT-5.1' },
-    { value: 'gpt-5.2', label: 'GPT-5.2' },
+    { value: 'auto', label: 'ChatGPT - Auto' },
+    { value: 'gpt-5', label: 'ChatGPT - GPT-5' },
+    { value: 'gpt-5-mini', label: 'ChatGPT - GPT-5 Mini' },
+    { value: 'gpt-5-t-mini', label: 'ChatGPT - GPT-5-Thinking Mini' },
+    { value: 'gpt-5.1', label: 'ChatGPT - GPT-5.1' },
+    { value: 'gpt-5.2', label: 'ChatGPT - GPT-5.2' },
 ];
 
 export const POPUP_MODES = [
