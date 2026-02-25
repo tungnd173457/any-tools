@@ -122,6 +122,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
                 const msgId = streamingMsgIdRef.current;
                 const finalModel = request.model || settingsRef.current.chatModel;
+                const apiConversationId = request.apiConversationId; // Received from background
                 streamingMsgIdRef.current = null;
                 setIsStreaming(false);
 
@@ -131,16 +132,26 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         m.id === msgId ? { ...m, isStreaming: false, model: finalModel } : m
                     );
 
-                    // Persist conversation with finalized messages
+                    // Persist conversation with finalized messages and apiConversationId
                     const convoId = currentConvoRef.current?.id;
                     if (convoId) {
                         const updatedConvos = conversationsRef.current.map(c =>
-                            c.id === convoId ? { ...c, messages: finalized, updatedAt: Date.now() } : c
+                            c.id === convoId ? {
+                                ...c,
+                                messages: finalized,
+                                updatedAt: Date.now(),
+                                ...(apiConversationId ? { apiConversationId } : {})
+                            } : c
                         );
                         setConversations(updatedConvos);
                         chrome.storage.local.set({ chatConversations: updatedConvos });
                         setCurrentConversation(prev2 =>
-                            prev2 ? { ...prev2, messages: finalized, updatedAt: Date.now() } : prev2
+                            prev2 ? {
+                                ...prev2,
+                                messages: finalized,
+                                updatedAt: Date.now(),
+                                ...(apiConversationId ? { apiConversationId } : {})
+                            } : prev2
                         );
                     }
 
@@ -324,7 +335,10 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 messages: apiMessages,
                 model: settings.chatModel,
                 apiKey: settings.openaiApiKey,
+                provider: settings.serviceProvider,
                 streamId,
+                apiConversationId: currentConvoRef.current?.apiConversationId, // pass if available
+                lastMessage: text.trim(), // helpful for ChatGPTReversed which primarily takes the last prompt
             },
             (response) => {
                 if (chrome.runtime.lastError) {

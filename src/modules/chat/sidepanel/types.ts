@@ -14,6 +14,7 @@ export interface ChatConversation {
     messages: ChatMessage[];
     createdAt: number;
     updatedAt: number;
+    apiConversationId?: string; // the actual conversation ID on ChatGPT backend
 }
 
 export interface ChatSettings {

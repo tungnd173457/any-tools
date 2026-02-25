@@ -7,12 +7,14 @@
         "storage",
         "activeTab",
         "sidePanel",
-        "tabs"
+        "tabs",
+        "cookies"
     ],
     "host_permissions": [
         "<all_urls>",
         "https://translate-pa.googleapis.com/*",
-        "https://api.openai.com/*"
+        "https://api.openai.com/*",
+        "https://chatgpt.com/*"
     ],
     "background": {
         "service_worker": "background.js",
