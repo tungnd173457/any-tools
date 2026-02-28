@@ -21,7 +21,7 @@ import type {
     FillFormAction,
     GetPageTextAction,
     BrowserAgentAction,
-} from './types';
+} from '../types';
 
 // ============================================================
 // Helper: Get Active Tab

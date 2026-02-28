@@ -1,7 +1,30 @@
 // Browser Agent Service - Public API
 export { BrowserAgent, default } from './client';
+
+// Agent lifecycle
+export { BrowserAgentRunner, startAgentTask, stopAgentTask, getAgentStatus, getActiveAgents } from './core/agent-service';
+
+// Agent types
 export type {
-    // Action types
+    AgentConfig,
+    AgentBrain,
+    AgentAction,
+    AgentActionResult,
+    AgentState,
+    AgentStepInfo,
+    AgentEvent,
+    AgentEventType,
+    BrowserStateSummary,
+    PageStats,
+    ScrollInfo,
+    HistoryItem,
+    PageFingerprint,
+    LoopDetectorState,
+    LLMMessage,
+} from './types/agent-types';
+
+// Tool types
+export type {
     BrowserAgentAction,
     BrowserAgentMessage,
     NavigateAction,
@@ -23,7 +46,6 @@ export type {
     GetPageTextAction,
     GetElementsAction,
     GetPageMetadataAction,
-    // Result types
     ToolResult,
     InteractiveElement,
     PageElements,

@@ -1,5 +1,5 @@
 // Browser Agent - Client Library
-// Convenience wrapper for calling browser-agent tools from UI/content scripts
+// Convenience wrapper for calling browser-agent tools + agent lifecycle from UI
 
 import type {
     ToolResult,
@@ -21,12 +21,8 @@ import type {
     FillFormAction,
     GetPageTextAction,
     BrowserAgentAction,
-    PageElements,
-    PageText,
-    SearchResult,
-    FindResult,
-    PageMetadata,
 } from './types';
+import type { AgentConfig, AgentEvent } from './types/agent-types';
 
 // ============================================================
 // Core message sender
@@ -47,114 +43,131 @@ function sendAction(action: BrowserAgentAction): Promise<ToolResult> {
     });
 }
 
+function sendLifecycle(action: string, data?: any): Promise<any> {
+    return new Promise((resolve) => {
+        chrome.runtime.sendMessage(
+            { action, ...data },
+            (response: any) => {
+                if (chrome.runtime.lastError) {
+                    resolve({ success: false, error: chrome.runtime.lastError.message });
+                } else {
+                    resolve(response);
+                }
+            }
+        );
+    });
+}
+
 // ============================================================
 // Typed API Methods
 // ============================================================
 
 export const BrowserAgent = {
-    /** Navigate to a URL */
+    // ── Tool Methods (unchanged) ──────────────────────────────
+
     navigate: (url: string, newTab?: boolean): Promise<ToolResult> =>
         sendAction({ tool: 'navigate', params: { url, newTab } }),
 
-    /** Go back in history */
     goBack: (): Promise<ToolResult> =>
         sendAction({ tool: 'go-back' }),
 
-    /** Get page text content as clean markdown */
     getPageText: (options?: GetPageTextAction): Promise<ToolResult> =>
         sendAction({ tool: 'get-page-text', params: options }),
 
-    /** Get all interactive elements on the current page */
     getElements: (): Promise<ToolResult> =>
         sendAction({ tool: 'get-elements' }),
 
-    /** Click an element by index, selector, or coordinates */
     clickElement: (params: ClickElementAction): Promise<ToolResult> =>
         sendAction({ tool: 'click-element', params }),
 
-    /** Click by index (shorthand) */
     click: (index: number): Promise<ToolResult> =>
         sendAction({ tool: 'click-element', params: { index } }),
 
-    /** Click by coordinates (shorthand) */
     clickAt: (x: number, y: number): Promise<ToolResult> =>
         sendAction({ tool: 'click-element', params: { coordinateX: x, coordinateY: y } }),
 
-    /** Type text into an element */
     typeText: (params: TypeTextAction): Promise<ToolResult> =>
         sendAction({ tool: 'type-text', params }),
 
-    /** Type into an element by index (shorthand) */
     type: (index: number, text: string, options?: { clear?: boolean; pressEnter?: boolean }): Promise<ToolResult> =>
         sendAction({ tool: 'type-text', params: { index, text, ...options } }),
 
-    /** Scroll the page */
     scroll: (params: ScrollAction): Promise<ToolResult> =>
         sendAction({ tool: 'scroll', params }),
 
-    /** Scroll down (shorthand) */
     scrollDown: (amount?: number): Promise<ToolResult> =>
         sendAction({ tool: 'scroll', params: { direction: 'down', amount } }),
 
-    /** Scroll up (shorthand) */
     scrollUp: (amount?: number): Promise<ToolResult> =>
         sendAction({ tool: 'scroll', params: { direction: 'up', amount } }),
 
-    /** Send keyboard shortcuts */
     sendKeys: (keys: string): Promise<ToolResult> =>
         sendAction({ tool: 'send-keys', params: { keys } }),
 
-    /** Wait for an element to appear */
     waitForElement: (selector: string, timeout?: number, visible?: boolean): Promise<ToolResult> =>
         sendAction({ tool: 'wait-for-element', params: { selector, timeout, visible } }),
 
-    /** Wait for navigation to complete */
     waitForNavigation: (timeout?: number): Promise<ToolResult> =>
         sendAction({ tool: 'wait-for-navigation', params: { timeout } }),
 
-    /** Search page text for a pattern */
     searchPage: (pattern: string, options?: Partial<SearchPageAction>): Promise<ToolResult> =>
         sendAction({ tool: 'search-page', params: { pattern, ...options } }),
 
-    /** Find elements by CSS selector */
     findElements: (selector: string, options?: Partial<Omit<FindElementsAction, 'selector'>>): Promise<ToolResult> =>
         sendAction({ tool: 'find-elements', params: { selector, ...options } }),
 
-    /** Get dropdown options */
     getDropdownOptions: (params: GetDropdownOptionsAction): Promise<ToolResult> =>
         sendAction({ tool: 'get-dropdown-options', params }),
 
-    /** Select dropdown option */
     selectDropdownOption: (params: SelectDropdownOptionAction): Promise<ToolResult> =>
         sendAction({ tool: 'select-dropdown-option', params }),
 
-    /** Execute JavaScript in the page context */
     evaluateJS: (code: string): Promise<ToolResult> =>
         sendAction({ tool: 'evaluate-js', params: { code } }),
 
-    /** Capture screenshot of the visible tab */
     captureVisibleTab: (format?: 'png' | 'jpeg', quality?: number): Promise<ToolResult> =>
         sendAction({ tool: 'capture-visible-tab', params: { format, quality } }),
 
-    /** Extract all links from the page */
     extractLinks: (filter?: string, options?: Partial<ExtractLinksAction>): Promise<ToolResult> =>
         sendAction({ tool: 'extract-links', params: { filter, ...options } }),
 
-    /** Get page metadata (title, description, OG tags, etc.) */
     getPageMetadata: (): Promise<ToolResult> =>
         sendAction({ tool: 'get-page-metadata' }),
 
-    /** Highlight an element visually */
     highlightElement: (params: HighlightElementAction): Promise<ToolResult> =>
         sendAction({ tool: 'highlight-element', params }),
 
-    /** Highlight by index (shorthand) */
     highlight: (index: number, color?: string, duration?: number): Promise<ToolResult> =>
         sendAction({ tool: 'highlight-element', params: { index, color, duration } }),
 
-    /** Fill form fields */
     fillForm: (fields: Record<string, string>): Promise<ToolResult> =>
         sendAction({ tool: 'fill-form', params: { fields } }),
+
+    // ── Agent Lifecycle Methods ───────────────────────────────
+
+    /** Start an autonomous agent task */
+    startTask: (task: string, config?: Partial<Omit<AgentConfig, 'task'>>): Promise<{ success: boolean; taskId?: string; error?: string }> =>
+        sendLifecycle('browserAgent:startTask', { config: { task, ...config } }),
+
+    /** Stop a running agent */
+    stopTask: (taskId: string): Promise<{ success: boolean; message?: string }> =>
+        sendLifecycle('browserAgent:stopTask', { taskId }),
+
+    /** Get agent status */
+    getStatus: (taskId?: string): Promise<{ success: boolean; data?: any }> =>
+        sendLifecycle('browserAgent:getStatus', { taskId }),
+
+    /** Listen for agent events */
+    onEvent: (callback: (event: AgentEvent) => void): (() => void) => {
+        const listener = (message: any) => {
+            if (message.action === 'browserAgentEvent' && message.event) {
+                callback(message.event);
+            }
+        };
+        chrome.runtime.onMessage.addListener(listener);
+        // Return unsubscribe function
+        return () => chrome.runtime.onMessage.removeListener(listener);
+    },
 };
 
 export default BrowserAgent;
