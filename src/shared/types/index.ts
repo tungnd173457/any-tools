@@ -1,2 +1,2 @@
-export { Settings, TranslationResult, TranslationResponse } from './settings';
-export { MessageAction, TranslationMessage, SettingsMessage, RuntimeMessage } from './messages';
+export type { Settings, TranslationResult, TranslationResponse } from './settings';
+export type { MessageAction, TranslationMessage, SettingsMessage, RuntimeMessage } from './messages';

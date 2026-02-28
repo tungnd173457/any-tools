@@ -1,1 +1,1 @@
-export { Settings, TranslationResult, TranslationResponse } from '../../shared/types';
+export type { Settings, TranslationResult, TranslationResponse } from '../../shared/types';

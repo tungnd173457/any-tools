@@ -1,0 +1,38 @@
+// Browser Agent Service - Public API
+export { BrowserAgent, default } from './client';
+export type {
+    // Action types
+    BrowserAgentAction,
+    BrowserAgentMessage,
+    NavigateAction,
+    ClickElementAction,
+    TypeTextAction,
+    ScrollAction,
+    SendKeysAction,
+    WaitForElementAction,
+    WaitForNavigationAction,
+    SearchPageAction,
+    FindElementsAction,
+    GetDropdownOptionsAction,
+    SelectDropdownOptionAction,
+    EvaluateJSAction,
+    CaptureVisibleTabAction,
+    ExtractLinksAction,
+    HighlightElementAction,
+    FillFormAction,
+    GetPageTextAction,
+    GetElementsAction,
+    GetPageMetadataAction,
+    // Result types
+    ToolResult,
+    InteractiveElement,
+    PageElements,
+    PageText,
+    SearchMatch,
+    SearchResult,
+    FoundElement,
+    FindResult,
+    LinkInfo,
+    PageMetadata,
+    DropdownOption,
+} from './types';
