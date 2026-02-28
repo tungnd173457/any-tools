@@ -16,8 +16,8 @@ export default defineConfig({
             input: {
                 background: resolve(__dirname, 'src/background/index.ts'),
                 content: resolve(__dirname, 'src/content/index.ts'),
-                options: resolve(__dirname, 'src/options/index.html'),
-                sidepanel: resolve(__dirname, 'src/modules/chat/sidepanel/index.html'),
+                options: resolve(__dirname, 'src/pages/options/index.html'),
+                sidepanel: resolve(__dirname, 'src/pages/sidepanel/index.html'),
             },
             output: {
                 entryFileNames: '[name].js',
