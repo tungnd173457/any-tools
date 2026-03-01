@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAgentContext } from '../../context/AgentContext';
 import AgentStepList from './AgentStepList';
 import AgentWelcomeScreen from './AgentWelcomeScreen';
 import AgentInput from './AgentInput';
+import AgentHistoryPanel from './AgentHistoryPanel';
 import ErrorBanner from '../shared/ErrorBanner';
 
 const AgentLayout: React.FC = () => {
     const { steps, taskDescription, error, clearError } = useAgentContext();
+    const [historyOpen, setHistoryOpen] = useState(false);
 
     const hasContent = steps.length > 0 || taskDescription;
 
@@ -22,8 +24,13 @@ const AgentLayout: React.FC = () => {
 
             {/* Input */}
             <div className="flex-none bg-[var(--chrome-bg)]">
-                <AgentInput />
+                <AgentInput onToggleHistory={() => setHistoryOpen(!historyOpen)} />
             </div>
+
+            {/* History Overlay */}
+            {historyOpen && (
+                <AgentHistoryPanel onClose={() => setHistoryOpen(false)} />
+            )}
         </div>
     );
 };

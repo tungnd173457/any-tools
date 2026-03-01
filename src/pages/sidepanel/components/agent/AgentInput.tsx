@@ -1,9 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useAgentContext } from '../../context/AgentContext';
-import { Bot, Plus, Square } from 'lucide-react';
+import { Bot, Plus, Square, History } from 'lucide-react';
+import { CUSTOM_MODELS } from '../../../../shared/constants';
+import ToolbarDropdown from '../shared/ToolbarDropdown';
 
-const AgentInput: React.FC = () => {
-    const { startAgent, stopAgent, isRunning, clearSteps, steps } = useAgentContext();
+interface AgentInputProps {
+    onToggleHistory: () => void;
+}
+
+const AgentInput: React.FC<AgentInputProps> = ({ onToggleHistory }) => {
+    const { startAgent, stopAgent, isRunning, startNewTask, steps, agentModel, setAgentModel } = useAgentContext();
     const [text, setText] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -33,6 +39,7 @@ const AgentInput: React.FC = () => {
     }, [text]);
 
     const hasContent = steps.length > 0;
+    const currentModelLabel = CUSTOM_MODELS.find(m => m.value === agentModel)?.label || agentModel;
 
     return (
         <div className="border-t border-[var(--chrome-border)] bg-[var(--chrome-bg)] p-3 shrink-0">
@@ -48,6 +55,39 @@ const AgentInput: React.FC = () => {
                     </button>
                 </div>
             )}
+
+            {/* Toolbar above input */}
+            <div className="flex items-center justify-between mb-3 px-1">
+                <div className="flex items-center gap-2">
+                    {/* Model Dropdown */}
+                    <ToolbarDropdown
+                        value={agentModel}
+                        label={currentModelLabel}
+                        options={CUSTOM_MODELS}
+                        onChange={setAgentModel}
+                    />
+                </div>
+
+                <div className="flex items-center gap-3">
+                    {/* History */}
+                    <button
+                        onClick={onToggleHistory}
+                        className="opacity-60 hover:opacity-100 transition-opacity"
+                        title="Agent History"
+                    >
+                        <History className="w-4 h-4" />
+                    </button>
+
+                    {/* New Task */}
+                    <button
+                        onClick={startNewTask}
+                        className="w-6 h-6 rounded-lg bg-[var(--chrome-input-bg)] border border-[var(--chrome-border)] flex items-center justify-center text-[var(--chrome-text)] opacity-80 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+                        title="New Task"
+                    >
+                        <Plus className="w-4 h-4" />
+                    </button>
+                </div>
+            </div>
 
             {/* Input area */}
             <div className="relative bg-[var(--chrome-input-bg)] rounded-2xl border border-[var(--chrome-border)] focus-within:border-[var(--chrome-text)]/20 transition-all">
@@ -76,24 +116,14 @@ const AgentInput: React.FC = () => {
                 )}
             </div>
 
-            {/* Bottom bar: branding + new task */}
-            <div className="flex items-center justify-between mt-2 px-1">
+            {/* Bottom bar: branding */}
+            <div className="flex items-center mt-2 px-1">
                 <div className="flex items-center gap-1.5">
                     <div className="w-4 h-4 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
                         <Bot className="w-2.5 h-2.5 text-white" />
                     </div>
                     <span className="text-[10px] font-medium text-[var(--chrome-text-secondary)]">Browser Agent</span>
                 </div>
-
-                {hasContent && !isRunning && (
-                    <button
-                        onClick={clearSteps}
-                        className="w-5 h-5 rounded-md bg-emerald-500 flex items-center justify-center hover:bg-emerald-400 transition-colors"
-                        title="New Task"
-                    >
-                        <Plus className="w-3 h-3 text-white" />
-                    </button>
-                )}
             </div>
         </div>
     );
