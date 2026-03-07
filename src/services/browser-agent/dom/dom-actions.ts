@@ -55,19 +55,24 @@ export function clickElementByIndex(index: number): { success: boolean; error?: 
             return { success: false, error: `Element with index ${index} not found. The page may have changed - try refreshing elements.` };
         }
 
-        // Scroll into view if needed
-        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Scroll into view
+        el.scrollIntoView({ behavior: 'instant', block: 'center' });
 
-        // Small delay to let scroll settle, then click
-        setTimeout(() => {
-            el.focus();
-            el.click();
+        // Force reflow so scroll completes before click
+        el.getBoundingClientRect();
 
-            // Also dispatch mouse events for frameworks that rely on them
-            el.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-            el.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
-            el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-        }, 100);
+        // Focus and click synchronously
+        el.focus();
+        el.click();
+
+        // Also dispatch mouse events for frameworks that rely on them
+        const rect = el.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const mouseOpts = { bubbles: true, cancelable: true, clientX: cx, clientY: cy, button: 0 };
+        el.dispatchEvent(new MouseEvent('mousedown', mouseOpts));
+        el.dispatchEvent(new MouseEvent('mouseup', mouseOpts));
+        el.dispatchEvent(new MouseEvent('click', mouseOpts));
 
         const desc = `${el.tagName.toLowerCase()}${el.id ? '#' + el.id : ''}`;
         const text = _getElementText(el);
@@ -158,13 +163,61 @@ export function typeTextByIndex(
                 inputEl.dispatchEvent(new KeyboardEvent('keypress', { key: char, bubbles: true }));
                 inputEl.dispatchEvent(new KeyboardEvent('keyup', { key: char, bubbles: true }));
             }
-        } else if (el.getAttribute('contenteditable') === 'true') {
-            // Content editable
+        } else if (el.getAttribute('contenteditable') === 'true' || el.isContentEditable) {
+            // Content editable (e.g. Facebook Messenger, Slack)
+            el.focus();
+
             if (clear) {
-                el.textContent = '';
+                // Select all and delete
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(el);
+                selection?.removeAllRanges();
+                selection?.addRange(range);
+                document.execCommand('delete', false);
+            } else {
+                // Move cursor to end
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(el);
+                range.collapse(false);
+                selection?.removeAllRanges();
+                selection?.addRange(range);
             }
-            el.textContent = (el.textContent || '') + text;
-            el.dispatchEvent(new Event('input', { bubbles: true }));
+
+            // Use execCommand for maximum framework compatibility
+            // This triggers the same events as real user typing
+            if (!document.execCommand('insertText', false, text)) {
+                // Fallback: use InputEvent with insertText type
+                const inputEvent = new InputEvent('beforeinput', {
+                    bubbles: true,
+                    cancelable: true,
+                    inputType: 'insertText',
+                    data: text,
+                });
+                el.dispatchEvent(inputEvent);
+
+                // Manually insert if beforeinput wasn't prevented
+                const textNode = document.createTextNode(text);
+                const sel = window.getSelection();
+                if (sel && sel.rangeCount > 0) {
+                    const r = sel.getRangeAt(0);
+                    r.deleteContents();
+                    r.insertNode(textNode);
+                    r.setStartAfter(textNode);
+                    r.collapse(true);
+                    sel.removeAllRanges();
+                    sel.addRange(r);
+                } else {
+                    el.appendChild(textNode);
+                }
+
+                el.dispatchEvent(new InputEvent('input', {
+                    bubbles: true,
+                    inputType: 'insertText',
+                    data: text,
+                }));
+            }
         } else {
             return { success: false, error: `Element at index ${index} is not a text input (tag: ${el.tagName.toLowerCase()})` };
         }
