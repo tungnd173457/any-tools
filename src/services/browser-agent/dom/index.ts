@@ -12,7 +12,7 @@
 //
 // 2. **Background-context utilities** — Used in the extension's background/service worker.
 //    These process results from page-context functions.
-//    Examples: chunkMarkdownByStructure(), capTextLength()
+//    Examples: chunkMarkdownByStructure()
 
 // ---- Types ----
 export type {
@@ -37,44 +37,6 @@ export {
 
 // ---- Core: DOM Tree Builder (page context) ----
 export { buildDOMTree } from './dom-tree-builder';
-
-// ---- Visibility Utilities ----
-export {
-    isElementVisible,
-    isContained,
-    isElementScrollable,
-    getScrollInfo,
-    getScrollInfoText,
-} from './visibility';
-
-export type { VisibilityOptions } from './visibility';
-
-// ---- CSS Selector Generation ----
-export {
-    generateCssSelector,
-    buildCssPath,
-    generateXPath,
-    findUniqueSelector,
-} from './css-selector';
-
-// ---- Interactive Element Detection ----
-export {
-    isInteractiveElement,
-    getElementText,
-    isFormElement,
-    detectPaginationButtons,
-} from './interactive-detector';
-
-export type { PaginationButton } from './interactive-detector';
-
-// ---- DOM Serialization Utilities ----
-export {
-    buildAttributesString,
-    capTextLength,
-    cleanSerializedText,
-    extractSelectOptions,
-    formatSelectOptionsCompact,
-} from './dom-serializer';
 
 // ---- Markdown Extraction & Chunking ----
 export {

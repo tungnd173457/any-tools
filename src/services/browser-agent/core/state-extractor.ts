@@ -3,7 +3,7 @@
 // Now uses the dom/ module's buildDOMTree for richer DOM analysis.
 
 import type { BrowserStateSummary, ScrollInfo } from '../types/agent-types';
-import { buildDOMTree } from '../dom';
+import { buildDOMTree } from '../dom/dom-tree-builder';
 
 // ============================================================
 // Helper: Execute script in tab

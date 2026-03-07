@@ -75,7 +75,8 @@ export function buildDOMTree(options: {
     const INCLUDE_ATTRIBUTES = options.includeAttributes ?? [
         'title', 'type', 'checked', 'id', 'name', 'role', 'value',
         'placeholder', 'alt', 'aria-label', 'aria-expanded', 'aria-checked',
-        'aria-selected', 'data-state', 'disabled', 'readonly', 'required',
+        'aria-selected', 'aria-required', 'aria-disabled', 'aria-hidden',
+        'data-state', 'disabled', 'readonly', 'required',
         'selected', 'href', 'src', 'for', 'action', 'method',
         'pattern', 'min', 'max', 'minlength', 'maxlength', 'step',
         'accept', 'multiple', 'inputmode', 'autocomplete', 'contenteditable',
@@ -322,9 +323,9 @@ export function buildDOMTree(options: {
             .map(n => n.textContent?.trim() || '')
             .filter(t => t.length > 0)
             .join(' ');
-        if (direct) return direct.slice(0, 150);
+        if (direct) return direct.slice(0, 50);
 
-        return ((el as HTMLElement).innerText?.trim() || '').slice(0, 150);
+        return ((el as HTMLElement).innerText?.trim() || '').slice(0, 50);
     }
 
     function isScrollable(el: Element): boolean {
@@ -486,13 +487,17 @@ export function buildDOMTree(options: {
             const children: NodeInfo[] = [];
             const textNodes: string[] = [];
 
+            // Tags whose text content is already captured via the `value` attribute
+            // in buildAttrString — skip their text nodes to avoid duplication.
+            const VALUE_TAGS = new Set(['textarea', 'input', 'select']);
+
             if (!isSvg) {
                 for (const child of node.childNodes) {
                     if (child.nodeType === Node.TEXT_NODE) {
-                        if (vis) {
+                        if (vis && !VALUE_TAGS.has(tag)) {
                             const text = child.textContent?.trim();
                             if (text && text.length > 0) {
-                                textNodes.push(text.slice(0, 200));
+                                textNodes.push(text.slice(0, 50));
                             }
                         }
                     } else {

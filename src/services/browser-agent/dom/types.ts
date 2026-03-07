@@ -187,9 +187,9 @@ export const INTERACTIVE_ROLES = new Set([
  * Interactive HTML attributes that indicate clickability.
  */
 export const INTERACTIVE_ATTRIBUTES = new Set([
-    'onclick', 'onmousedown', 'onmouseup', 'onkeydown', 'onkeyup',
-    'tabindex', 'ng-click', '@click', 'v-on:click', 'data-action',
-    'data-onclick', 'jsaction',
+    'onclick', 'onmousedown', 'onmouseup', 'onkeydown', 'onkeyup', 'ontouchstart',
+    'tabindex', 'ng-click', 'v-on:click', '@click', 'data-action',
+    'data-onclick', 'jsaction', '(click)', 'data-ng-click', 'data-ember-action',
 ]);
 
 /**
