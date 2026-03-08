@@ -589,9 +589,13 @@ export function buildDOMTree(options: {
             lines.push(line);
             nodeRendered = true;
         } else if (info.isScrollable && info.isVisible) {
-            // Non-interactive scrollable container
+            // Non-interactive scrollable container — still gets an index for scroll targeting
+            const idx = interactiveIdx++;
+            interactiveCount.value++;
+            info.el.setAttribute('data-ba-idx', String(idx));
+
             const attrStr = buildAttrString(info.el);
-            let line = `${indent}|scroll element|<${info.tag}`;
+            let line = `${indent}|scroll element|[${idx}]<${info.tag}`;
             if (attrStr) line += ` ${attrStr}`;
             line += ' />';
 

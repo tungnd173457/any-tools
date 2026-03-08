@@ -294,9 +294,9 @@ async function scrollTool(params: ScrollAction): Promise<ToolResult> {
         const tab = await getActiveTab();
         const result = await executeInTab(tab.id!, scrollPage, [
             params.direction,
-            params.amount,
-            params.index,
-            params.selector,
+            params.amount ?? null,
+            params.index ?? null,
+            params.selector ?? null,
         ]);
         return { success: result.success, data: result };
     } catch (e: any) {
@@ -416,8 +416,8 @@ async function getDropdownOptionsTool(params: GetDropdownOptionsAction): Promise
     try {
         const tab = await getActiveTab();
         const result = await executeInTab(tab.id!, getDropdownOptions, [
-            params.index,
-            params.selector,
+            params.index ?? null,
+            params.selector ?? null,
         ]);
         return { success: result.success, data: result, error: result.error };
     } catch (e: any) {
@@ -433,10 +433,10 @@ async function selectDropdownOptionTool(params: SelectDropdownOptionAction): Pro
     try {
         const tab = await getActiveTab();
         const result = await executeInTab(tab.id!, selectDropdownOption, [
-            params.index,
-            params.selector,
-            params.value,
-            params.text,
+            params.index ?? null,
+            params.selector ?? null,
+            params.value ?? null,
+            params.text ?? null,
         ]);
         return { success: result.success, data: result, error: result.error };
     } catch (e: any) {
@@ -502,7 +502,7 @@ async function extractLinksTool(params?: ExtractLinksAction): Promise<ToolResult
     try {
         const tab = await getActiveTab();
         const result = await executeInTab(tab.id!, extractLinks, [
-            params?.filter,
+            params?.filter ?? null,
             params?.includeText ?? true,
             params?.maxResults ?? 100,
         ]);
@@ -534,8 +534,8 @@ async function highlightElementTool(params: HighlightElementAction): Promise<Too
     try {
         const tab = await getActiveTab();
         const result = await executeInTab(tab.id!, highlightElement, [
-            params.index,
-            params.selector,
+            params.index ?? null,
+            params.selector ?? null,
             params.color ?? 'rgba(255,100,0,0.35)',
             params.duration ?? 2000,
         ]);
