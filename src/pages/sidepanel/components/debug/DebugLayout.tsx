@@ -8,6 +8,7 @@ import PageMetadataPanel from './panels/PageMetadataPanel';
 import SearchPagePanel from './panels/SearchPagePanel';
 import FindElementsPanel from './panels/FindElementsPanel';
 import HighlightPanel from './panels/HighlightPanel';
+import ScrollPanel from './panels/ScrollPanel';
 import EvaluateJsPanel from './panels/EvaluateJsPanel';
 import AgentStatusPanel from './panels/AgentStatusPanel';
 
@@ -36,6 +37,7 @@ const DebugLayout: React.FC = () => {
                     <SearchPagePanel />
                     <FindElementsPanel />
                     <HighlightPanel />
+                    <ScrollPanel />
                     <EvaluateJsPanel />
                     <AgentStatusPanel />
                 </div>

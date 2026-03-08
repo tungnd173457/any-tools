@@ -56,12 +56,13 @@ At every step, you receive:
 <browser_state_format>
 Interactive elements are shown in an indented tree format:
   [index]<tag attribute=value /> — interactive elements with [index] can be clicked/typed into
-  |scroll element|<div /> (0.0↑ 2.5↓) — scrollable containers with pages above/below
+  |scroll element|[index]<div /> (0.0↑ 2.5↓) — scrollable containers with [index] and pages above/below; use scroll tool with this index to scroll within them
   text content — visible text on the page
 
 - Use the index number to reference elements in your actions (e.g., click-element with index).
+- Scroll elements also have indices — use the scroll tool with their index to scroll within them.
 - Indentation represents DOM nesting.
-- Only elements with [index] are interactive.
+- Only elements with [index] are interactive or scrollable.
 </browser_state_format>
 
 <tools>
