@@ -18,7 +18,6 @@
  */
 export function buildDOMTree(options: {
     maxDepth?: number;
-    includeAttributes?: string[];
     viewportExpansion?: number;
 } = {}): {
     url: string;
@@ -72,15 +71,6 @@ export function buildDOMTree(options: {
         'text', 'tspan',
     ]);
 
-    const INCLUDE_ATTRIBUTES = options.includeAttributes ?? [
-        'title', 'type', 'checked', 'id', 'name', 'role', 'value',
-        'placeholder', 'alt', 'aria-label', 'aria-expanded', 'aria-checked',
-        'aria-selected', 'aria-required', 'aria-disabled', 'aria-hidden',
-        'data-state', 'disabled', 'readonly', 'required',
-        'selected', 'href', 'src', 'for', 'action', 'method',
-        'pattern', 'min', 'max', 'minlength', 'maxlength', 'step',
-        'accept', 'multiple', 'inputmode', 'autocomplete', 'contenteditable',
-    ];
 
     // Elements that propagate bounds to their children.
     // Children fully contained within these elements are NOT indexed separately.
@@ -135,25 +125,31 @@ export function buildDOMTree(options: {
                 ) {
                     return false;
                 }
-                // CSS clipping techniques (e.g. .sr-only)
-                if (
-                    s.clip === 'rect(0px, 0px, 0px, 0px)' ||
-                    s.clipPath === 'inset(100%)'
-                ) {
+                // CSS clipping techniques (e.g. .sr-only, .show-on-focus)
+                const clipRaw = s.clip?.replace(/\s/g, '');
+                const clipPath = s.clipPath?.replace(/\s/g, '');
+                if (clipPath === 'inset(100%)') {
+                    return false;
+                }
+                // Match clip: rect(Npx, Npx, Npx, Npx) where all values ≤ 1
+                if (clipRaw) {
+                    const m = clipRaw.match(/^rect\(([\d.]+)px,([\d.]+)px,([\d.]+)px,([\d.]+)px\)$/);
+                    if (m && parseFloat(m[1]) <= 1 && parseFloat(m[2]) <= 1 && parseFloat(m[3]) <= 1 && parseFloat(m[4]) <= 1) {
+                        return false;
+                    }
+                }
+
+                // Tiny element with overflow hidden = effectively invisible
+                // Since getBoundingClientRect() returns the unclipped size of children,
+                // we must check if any ancestor is a tiny box that hides its overflow.
+                const r = current.getBoundingClientRect();
+                if (r.width <= 1 && r.height <= 1 && s.overflow === 'hidden') {
                     return false;
                 }
             } catch {
                 break; // getComputedStyle may fail for some elements
             }
             current = current.parentElement;
-        }
-
-        // Tiny element with overflow hidden = effectively invisible (e.g. sr-only text)
-        if (rect.width <= 1 && rect.height <= 1) {
-            try {
-                const s = window.getComputedStyle(el);
-                if (s.overflow === 'hidden') return false;
-            } catch { /* skip */ }
         }
 
         // Viewport intersection with expansion threshold
@@ -337,55 +333,95 @@ export function buildDOMTree(options: {
         } catch { return false; }
     }
 
-    function buildAttrString(el: Element): string {
-        const parts: string[] = [];
-        for (const attrName of INCLUDE_ATTRIBUTES) {
-            let value: string | null = null;
+    // ---- Semantic role & state helpers ----
 
-            // For 'value', get live value from input elements
-            if (attrName === 'value') {
-                const tag = el.tagName.toLowerCase();
-                if (tag === 'input' || tag === 'textarea') {
-                    value = (el as HTMLInputElement).value || null;
-                } else if (tag === 'select') {
-                    value = (el as HTMLSelectElement).value || null;
-                } else {
-                    value = el.getAttribute(attrName);
-                }
-            } else if (attrName === 'checked') {
-                if ((el as HTMLInputElement).checked) {
-                    value = 'true';
-                } else {
-                    continue;
-                }
-            } else {
-                value = el.getAttribute(attrName);
-            }
+    /** Map an element to its semantic role string for LLM-friendly display. */
+    function resolveRole(el: Element): string {
+        const tag = el.tagName.toLowerCase();
 
-            if (value !== null && value.trim() !== '') {
-                // Cap value length
-                const capped = value.length > 100 ? value.slice(0, 100) + '...' : value;
-                parts.push(`${attrName}=${capped}`);
-            }
+        // 1. Explicit role attribute takes priority
+        const role = el.getAttribute('role');
+        if (role && role !== 'presentation' && role !== 'none') return role;
+
+        // 2. Input type mapping
+        if (tag === 'input') {
+            const type = (el.getAttribute('type') || 'text').toLowerCase();
+            const typeMap: Record<string, string> = {
+                checkbox: 'checkbox', radio: 'radio', submit: 'button',
+                reset: 'button', file: 'file', image: 'button',
+                range: 'slider', number: 'spinbutton', search: 'searchbox',
+                password: 'textbox', text: 'textbox', email: 'textbox',
+                url: 'textbox', tel: 'textbox', date: 'textbox',
+                time: 'textbox', 'datetime-local': 'textbox', month: 'textbox',
+                week: 'textbox', color: 'textbox', hidden: 'hidden',
+            };
+            return typeMap[type] || 'textbox';
         }
 
-        // Remove duplicates (same value with different attribute names)
-        const seen = new Map<string, string>();
-        const result: string[] = [];
-        const protectedAttrs = new Set(['value', 'aria-label', 'placeholder', 'title', 'alt']);
+        // 3. Tag name mapping
+        const tagMap: Record<string, string> = {
+            a: 'link', button: 'button', textarea: 'textbox',
+            select: 'combobox', option: 'option', optgroup: 'group',
+            img: 'img', nav: 'nav', details: 'details', summary: 'summary',
+            iframe: 'iframe', frame: 'frame', label: 'label',
+            h1: 'h1', h2: 'h2', h3: 'h3', h4: 'h4', h5: 'h5', h6: 'h6',
+            table: 'table', form: 'form', dialog: 'dialog',
+            header: 'header', footer: 'footer', main: 'main',
+            section: 'section', article: 'article', aside: 'aside',
+        };
+        return tagMap[tag] || tag;
+    }
 
-        for (const part of parts) {
-            const eqIdx = part.indexOf('=');
-            const key = part.slice(0, eqIdx);
-            const val = part.slice(eqIdx + 1);
-            if (val.length > 5 && seen.has(val) && !protectedAttrs.has(key)) {
-                continue;
-            }
-            seen.set(val, key);
-            result.push(part);
+    /** Build compact state flags like [required] [checked=true] [expanded] etc. */
+    function resolveStateFlags(el: Element): string {
+        const flags: string[] = [];
+        const tag = el.tagName.toLowerCase();
+
+        // Required
+        if (el.hasAttribute('required') || el.getAttribute('aria-required') === 'true') {
+            flags.push('[required]');
         }
 
-        return result.join(' ');
+        // Disabled
+        if (el.hasAttribute('disabled') || el.getAttribute('aria-disabled') === 'true') {
+            flags.push('[disabled]');
+        }
+
+        // Readonly
+        if (el.hasAttribute('readonly')) {
+            flags.push('[readonly]');
+        }
+
+        // Checked (for checkbox/radio)
+        if (tag === 'input') {
+            const type = (el.getAttribute('type') || '').toLowerCase();
+            if (type === 'checkbox' || type === 'radio') {
+                flags.push(`[checked=${(el as HTMLInputElement).checked}]`);
+            }
+        }
+        if (el.getAttribute('aria-checked') !== null) {
+            flags.push(`[checked=${el.getAttribute('aria-checked')}]`);
+        }
+
+        // Expanded / Collapsed
+        const expanded = el.getAttribute('aria-expanded');
+        if (expanded === 'true') {
+            flags.push('[expanded]');
+        } else if (expanded === 'false') {
+            flags.push('[collapsed]');
+        }
+
+        // Selected
+        if (el.getAttribute('aria-selected') === 'true' || (el as HTMLOptionElement).selected === true) {
+            flags.push('[selected]');
+        }
+
+        // Multiple (select/file)
+        if (el.hasAttribute('multiple')) {
+            flags.push('[multiple]');
+        }
+
+        return flags.join(' ');
     }
 
     // ---- Tree walk and serialization ----
@@ -487,8 +523,8 @@ export function buildDOMTree(options: {
             const children: NodeInfo[] = [];
             const textNodes: string[] = [];
 
-            // Tags whose text content is already captured via the `value` attribute
-            // in buildAttrString — skip their text nodes to avoid duplication.
+            // Tags whose text content is already captured via getElText
+            // — skip their text nodes to avoid duplication.
             const VALUE_TAGS = new Set(['textarea', 'input', 'select']);
 
             if (!isSvg) {
@@ -525,26 +561,21 @@ export function buildDOMTree(options: {
         return null;
     }
 
-    function serializeNode(info: NodeInfo, depth: number): string {
+    /**
+     * Serialize a NodeInfo into LLM-friendly text.
+     *
+     * Format for interactive elements:
+     *   [idx] role href? "text" [flags]
+     *
+     * Examples:
+     *   [1] link /product "Sản phẩm"
+     *   [2] button "Đăng nhập"
+     *   [3] [required] textbox "Tên người dùng"
+     *   [4] [checked=true] checkbox "Đồng ý"
+     *   [5] [scroll] nav "Chat history" (0↑ 1.8↓)
+     */
+    function serializeNode(info: NodeInfo): string {
         const lines: string[] = [];
-        const indent = '\t'.repeat(depth);
-
-        // // Handle SVG — collapsed
-        // if (info.isSvg) {
-        //     // Completely skip if excluded by bounding box propagation or invisible
-        //     if (info.excludedByParent || !info.isVisible) return '';
-
-        //     let line = indent;
-        //     if (info.isInteractive) {
-        //         const idx = interactiveIdx++;
-        //         interactiveCount.value++;
-        //         info.el.setAttribute('data-ba-idx', String(idx));
-        //         line += `[${idx}]`;
-        //     }
-        //     const attrStr = buildAttrString(info.el);
-        //     line += `<svg${attrStr ? ' ' + attrStr : ''} /> <!-- SVG -->`;
-        //     return line;
-        // }
 
         // Determine if this node needs to be rendered
         const shouldRender =
@@ -556,8 +587,6 @@ export function buildDOMTree(options: {
 
         if (!shouldRender) return '';
 
-        let nodeRendered = false;
-
         // Render interactive elements
         // Skip elements excluded by bounding-box propagation filtering.
         if (info.isInteractive && info.isVisible && !info.excludedByParent) {
@@ -565,14 +594,38 @@ export function buildDOMTree(options: {
             interactiveCount.value++;
             info.el.setAttribute('data-ba-idx', String(idx));
 
-            const attrStr = buildAttrString(info.el);
-            const scrollPrefix = info.isScrollable ? '|scroll|' : '';
+            const role = resolveRole(info.el);
+            const text = getElText(info.el);
+            const stateFlags = resolveStateFlags(info.el);
 
-            let line = `${indent}${scrollPrefix}[${idx}]<${info.tag}`;
-            if (attrStr) line += ` ${attrStr}`;
-            line += ' />';
+            // Build: [idx] [scroll]? [flags]? role href? "text"
+            let line = `[${idx}]`;
 
-            // Add scroll info
+            // Scroll marker
+            if (info.isScrollable) line += ' [scroll]';
+
+            // State flags before role
+            if (stateFlags) line += ` ${stateFlags}`;
+
+            // Role
+            line += ` ${role}`;
+
+            // Href for links (inline after role)
+            if (info.tag === 'a') {
+                const href = info.el.getAttribute('href');
+                if (href) {
+                    const cappedHref = href.length > 80 ? href.slice(0, 80) + '...' : href;
+                    line += ` ${cappedHref}`;
+                }
+            }
+
+            // Display text
+            if (text) {
+                const cappedText = text.length > 50 ? text.slice(0, 50) + '...' : text;
+                line += ` "${cappedText}"`;
+            }
+
+            // Scroll info
             if (info.isScrollable) {
                 const scrollEl = info.el;
                 const pagesBelow = scrollEl.clientHeight > 0
@@ -582,22 +635,26 @@ export function buildDOMTree(options: {
                     ? Math.round(scrollEl.scrollTop / scrollEl.clientHeight * 10) / 10
                     : 0;
                 if (pagesBelow > 0 || pagesAbove > 0) {
-                    line += ` (scroll: ${pagesAbove}↑ ${pagesBelow}↓)`;
+                    line += ` (${pagesAbove}↑ ${pagesBelow}↓)`;
                 }
             }
 
             lines.push(line);
-            nodeRendered = true;
         } else if (info.isScrollable && info.isVisible) {
             // Non-interactive scrollable container — still gets an index for scroll targeting
             const idx = interactiveIdx++;
             interactiveCount.value++;
             info.el.setAttribute('data-ba-idx', String(idx));
 
-            const attrStr = buildAttrString(info.el);
-            let line = `${indent}|scroll element|[${idx}]<${info.tag}`;
-            if (attrStr) line += ` ${attrStr}`;
-            line += ' />';
+            const role = resolveRole(info.el);
+            const text = getElText(info.el);
+
+            let line = `[${idx}] [scroll] ${role}`;
+
+            if (text) {
+                const cappedText = text.length > 50 ? text.slice(0, 50) + '...' : text;
+                line += ` "${cappedText}"`;
+            }
 
             const scrollEl = info.el;
             const pagesBelow = scrollEl.clientHeight > 0
@@ -611,21 +668,18 @@ export function buildDOMTree(options: {
             }
 
             lines.push(line);
-            nodeRendered = true;
         }
 
-        // Render text nodes
+        // Render text nodes (flat, no indentation)
         for (const text of info.textNodes) {
             if (text.length > 1) {
-                const textDepth = nodeRendered ? depth + 1 : depth;
-                lines.push(`${'\t'.repeat(textDepth)}${text}`);
+                lines.push(text);
             }
         }
 
-        // Render children
-        const childDepth = nodeRendered ? depth + 1 : depth;
+        // Render children (flat, no depth tracking)
         for (const child of info.children) {
-            const childText = serializeNode(child, childDepth);
+            const childText = serializeNode(child);
             if (childText) lines.push(childText);
         }
 
@@ -649,7 +703,7 @@ export function buildDOMTree(options: {
     // Serialize
     let domTreeText = '';
     if (rootInfo) {
-        domTreeText = serializeNode(rootInfo, 0);
+        domTreeText = serializeNode(rootInfo);
     }
 
     return {

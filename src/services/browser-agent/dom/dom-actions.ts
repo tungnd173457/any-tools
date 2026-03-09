@@ -410,24 +410,27 @@ export function waitForElement(
                     ) {
                         return false;
                     }
+                    // CSS clipping techniques (e.g. .sr-only)
+                    const clip = s.clip?.replace(/\s/g, '');
+                    const clipPath = s.clipPath?.replace(/\s/g, '');
                     if (
-                        s.clip === 'rect(0px, 0px, 0px, 0px)' ||
-                        s.clipPath === 'inset(100%)'
+                        clip === 'rect(0px,0px,0px,0px)' ||
+                        clipPath === 'inset(100%)'
                     ) {
+                        return false;
+                    }
+
+                    // Tiny element with overflow hidden = effectively invisible
+                    // Since getBoundingClientRect() returns the unclipped size of children,
+                    // we must check if any ancestor is a tiny box that hides its overflow.
+                    const r = current.getBoundingClientRect();
+                    if (r.width <= 1 && r.height <= 1 && s.overflow === 'hidden') {
                         return false;
                     }
                 } catch {
                     break;
                 }
                 current = current.parentElement;
-            }
-
-            // Tiny element with overflow hidden
-            if (rect.width <= 1 && rect.height <= 1) {
-                try {
-                    const s = window.getComputedStyle(el);
-                    if (s.overflow === 'hidden') return false;
-                } catch { /* skip */ }
             }
 
             return true;
