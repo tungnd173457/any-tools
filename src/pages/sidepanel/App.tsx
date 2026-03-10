@@ -4,6 +4,7 @@ import { AgentProvider } from './context/AgentContext';
 import ChatLayout from './components/layout/ChatLayout';
 import AgentLayout from './components/agent/AgentLayout';
 import DebugLayout from './components/debug/DebugLayout';
+import OcrLayout from './components/ocr/OcrLayout';
 import Sidebar, { type AppMode } from './components/layout/Sidebar';
 
 const App: React.FC = () => {
@@ -14,6 +15,7 @@ const App: React.FC = () => {
             case 'chat': return <ChatLayout />;
             case 'agent': return <AgentLayout />;
             case 'debug': return <DebugLayout />;
+            case 'ocr': return <OcrLayout />;
         }
     };
 

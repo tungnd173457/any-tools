@@ -894,3 +894,349 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* ============================================================ */
+/* OCR Module                                                     */
+/* ============================================================ */
+
+/* ---- Drop Zone ---- */
+.ocr-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 48px 24px;
+    border: 2px dashed rgba(124, 58, 237, 0.35);
+    border-radius: 16px;
+    background: rgba(124, 58, 237, 0.04);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.ocr-dropzone:hover {
+    border-color: rgba(124, 58, 237, 0.6);
+    background: rgba(124, 58, 237, 0.08);
+}
+
+.ocr-dropzone-active {
+    border-color: #7c3aed;
+    background: rgba(124, 58, 237, 0.12);
+}
+
+.ocr-dropzone-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3);
+}
+
+/* ---- Screenshot Button ---- */
+.ocr-screenshot-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    color: white;
+    border: none;
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+}
+
+.ocr-screenshot-btn:hover {
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+    transform: translateY(-1px);
+}
+
+.ocr-screenshot-btn:active {
+    transform: translateY(0);
+}
+
+/* ---- Image Preview Container ---- */
+.ocr-preview-container {
+    border: 1px solid var(--chrome-border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--chrome-bg);
+}
+
+.ocr-preview-image-area {
+    position: relative;
+    width: 100%;
+    min-height: 200px;
+    max-height: 320px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+}
+
+@media (prefers-color-scheme: dark) {
+    .ocr-preview-image-area {
+        background: #1a1a2e;
+    }
+}
+
+.ocr-preview-img {
+    max-width: 100%;
+    max-height: 320px;
+    object-fit: contain;
+    transition: transform 0.15s ease;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+/* ---- Zoom Controls ---- */
+.ocr-zoom-controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 10;
+}
+
+.ocr-zoom-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #374151;
+    transition: background 0.15s;
+}
+
+.ocr-zoom-btn:hover {
+    background: white;
+}
+
+@media (prefers-color-scheme: dark) {
+    .ocr-zoom-btn {
+        background: rgba(30, 30, 46, 0.9);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #e5e7eb;
+    }
+
+    .ocr-zoom-btn:hover {
+        background: rgba(40, 40, 60, 0.95);
+    }
+}
+
+/* ---- Preview Action Bar ---- */
+.ocr-preview-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-top: 1px solid var(--chrome-border);
+}
+
+.ocr-action-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--chrome-border);
+    background: var(--chrome-bg);
+    color: var(--chrome-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.ocr-action-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--chrome-text);
+}
+
+@media (prefers-color-scheme: dark) {
+    .ocr-action-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+}
+
+.ocr-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.ocr-action-delete:hover {
+    color: #ef4444;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.ocr-action-extract {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.2);
+    color: #7c3aed;
+}
+
+.ocr-action-extract:hover {
+    background: rgba(124, 58, 237, 0.15);
+}
+
+/* ---- Extracting Overlay ---- */
+.ocr-extracting-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    z-index: 20;
+}
+
+.ocr-spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid rgba(255, 255, 255, 0.2);
+    border-top-color: #8b5cf6;
+    border-radius: 50%;
+    animation: ocr-spin 0.8s linear infinite;
+}
+
+.ocr-spinner-sm {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(124, 58, 237, 0.2);
+    border-top-color: #8b5cf6;
+    border-radius: 50%;
+    animation: ocr-spin 0.8s linear infinite;
+}
+
+@keyframes ocr-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ---- Result Panel ---- */
+.ocr-result-panel {
+    border: 1px solid var(--chrome-border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--chrome-bg);
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 120px;
+}
+
+.ocr-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--chrome-border);
+}
+
+.ocr-result-loading {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ocr-result-textarea {
+    flex: 1;
+    width: 100%;
+    min-height: 100px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    border: none;
+    outline: none;
+    resize: none;
+    background: transparent;
+    color: var(--chrome-text);
+    font-family: 'Inter', system-ui, sans-serif;
+}
+
+.ocr-result-textarea::placeholder {
+    color: var(--chrome-text-secondary);
+}
+
+/* ---- Bottom Toolbar ---- */
+.ocr-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-top: 1px solid var(--chrome-border);
+    background: var(--chrome-bg);
+    flex-shrink: 0;
+}
+
+.ocr-toolbar-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    color: var(--chrome-text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.ocr-toolbar-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--chrome-text);
+}
+
+@media (prefers-color-scheme: dark) {
+    .ocr-toolbar-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+}
+
+.ocr-toolbar-btn-active {
+    color: #7c3aed;
+}
+
+.ocr-toolbar-chat-btn {
+    padding: 6px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    background: transparent;
+    color: var(--chrome-text-secondary);
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.ocr-toolbar-chat-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+    color: var(--chrome-text);
+}
+
+@media (prefers-color-scheme: dark) {
+    .ocr-toolbar-chat-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+    }
+}

@@ -12,4 +12,7 @@ import './selection';
 // Import screenshot selection handler
 import './screenshot';
 
+// Import OCR image picker handler
+import './ocr-image-picker';
+
 console.log('AnyTools Content Script Loaded');

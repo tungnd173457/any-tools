@@ -314,14 +314,18 @@ export function buildDOMTree(options: {
             .join(' ');
         if (direct) return direct.slice(0, 50);
 
-        // aria-label fallback (e.g. icon buttons, option items)
+        // innerText — skip when element has interactive children
+        // to avoid aggregating their text (causes duplication).
+        if (!skipInnerText) {
+            const inner = ((el as HTMLElement).innerText?.trim() || '').slice(0, 50);
+            if (inner) return inner;
+        }
+
+        // aria-label as last resort (e.g. icon-only buttons with no visible text)
         const ariaLabel = el.getAttribute('aria-label');
         if (ariaLabel) return ariaLabel.slice(0, 50);
 
-        // innerText as last resort — skip when element has interactive
-        // children to avoid aggregating their text (causes duplication).
-        if (skipInnerText) return '';
-        return ((el as HTMLElement).innerText?.trim() || '').slice(0, 50);
+        return '';
     }
 
     function isScrollable(el: Element): boolean {
